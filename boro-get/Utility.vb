@@ -47,9 +47,10 @@ Module GlobalUses
 
     Public RepoFileUrl As String
 
-    Public PacketName As String
-    Public PacketRunParameters As String
-    Public MustRunAtEnd As Boolean
+    Public MustRecharge As Boolean = False
+    Public PacketName As String = Nothing
+    Public PacketRunParameters As String = Nothing
+    Public MustRunAtEnd As Boolean = True
 End Module
 Module StartUp
     Sub Init()
@@ -67,6 +68,7 @@ Module StartUp
         Try
             If Not My.Computer.FileSystem.DirectoryExists(DIRCommons) Then
                 My.Computer.FileSystem.CreateDirectory(DIRCommons)
+                MustRecharge = True
             End If
             If My.Computer.FileSystem.FileExists(DIRRepoFile) Then
                 My.Computer.FileSystem.DeleteFile(DIRRepoFile)
@@ -97,6 +99,8 @@ Module StartUp
     End Sub
 End Module
 Module PacketAdministrator
+    Dim execFilePath As String
+    Dim installFolder As String
     Sub SearchInRepoList(ByVal packetName As String)
         Try
             If My.Computer.FileSystem.FileExists(DIRRepoFile) Then
@@ -152,8 +156,9 @@ Module PacketAdministrator
     End Sub
     Sub CallInstaller(ByVal zipFilePath As String)
         Try
-            Install(zipFilePath)
-            FinishInstall()
+            If Not isInstalled(zipFilePath) Then
+                FinishInstall()
+            End If
             End
         Catch ex As Exception
             AddToLog("CallEXInstaller@PacketAdministrator", "Error: " & ex.Message, True)
@@ -161,25 +166,39 @@ Module PacketAdministrator
         End Try
     End Sub
 
-    Dim installFolder As String = GetIniValue("INSTALLER", "InstallFolder", DIRPacketRepo)
-    Sub Install(ByVal zipFilePath As String)
+    Function isInstalled(ByVal zipFilePath As String) As Boolean
         Try
             installFolder = GetIniValue("INSTALLER", "InstallFolder", DIRPacketRepo)
             installFolder = installFolder.Replace("%temp%", "C:\Users\" & Environment.UserName & "\AppData\Local\Temp")
             installFolder = installFolder.Replace("%username%", Environment.UserName)
             installFolder = installFolder.Replace("%localappdata%", "C:\Users\" & Environment.UserName & "\AppData\Local")
             installFolder = installFolder.Replace("%appdata%", "C:\Users\" & Environment.UserName & "\AppData\Roaming")
-            ZipFile.ExtractToDirectory(zipFilePath, installFolder)
+            execFilePath = installFolder & "\" & GetIniValue("ASSEMBLY", "Executable", DIRPacketRepo)
+            If MustRecharge Then
+                If My.Computer.FileSystem.FileExists(execFilePath) Then
+                    My.Computer.FileSystem.DeleteFile(execFilePath)
+                End If
+                ZipFile.ExtractToDirectory(zipFilePath, installFolder)
+                Return False
+            End If
+            If My.Computer.FileSystem.FileExists(execFilePath) Then
+                MustRunAtEnd = True
+                FinishInstall()
+                Return True
+            Else
+                ZipFile.ExtractToDirectory(zipFilePath, installFolder)
+                Return False
+            End If
         Catch ex As Exception
-            AddToLog("Install@PacketAdministrator", "Error: " & ex.Message, True)
+            AddToLog("isInstalled@PacketAdministrator", "Error: " & ex.Message, True)
         End Try
-    End Sub
+    End Function
     Sub FinishInstall()
         Try
             If MustRunAtEnd Then
                 Dim argsToRun As String = Nothing
                 argsToRun = PacketRunParameters
-                Process.Start(installFolder & "\" & GetIniValue("ASSEMBLY", "Executable", DIRPacketRepo), argsToRun)
+                Process.Start(execFilePath, argsToRun)
             End If
         Catch ex As Exception
             AddToLog("FinishInstall@PacketAdministrator", "Error: " & ex.Message, True)

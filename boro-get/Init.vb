@@ -11,10 +11,24 @@
         Me.Hide()
         Try
             'parametros = RMTDSK|True|-ServerIP=192.168.8.175 -ServerPort=15243
-            Dim args As String() = parametros.Split("|")
-            PacketName = args(0) 'RMTDSK
-            MustRunAtEnd = args(1) 'True
-            PacketRunParameters = args(2) '-ServerIP=192.168.8.175 -ServerPort=15243
+            If parameters.Contains("|") Then
+                Dim args As String() = parametros.Split("|")
+                PacketName = args(0) 'RMTDSK
+                MustRunAtEnd = args(1) 'True
+                PacketRunParameters = args(2) '-ServerIP=192.168.8.175 -ServerPort=15243
+            ElseIf parameters.Contains(" ") Then
+                Dim args As String() = parametros.Split(" ")
+                PacketName = args(0)
+                MustRunAtEnd = Boolean.Parse(args(1))
+                PacketRunParameters = " "
+                For i = 2 To args.Count - 1
+                    PacketRunParameters &= args(i) & " "
+                Next
+                PacketRunParameters = PacketRunParameters.TrimStart()
+                PacketRunParameters = PacketRunParameters.TrimEnd()
+            Else
+                PacketName = parameters
+            End If
         Catch ex As Exception
             AddToLog("ReadParameters@Init", "Error: " & ex.Message, True)
             End
