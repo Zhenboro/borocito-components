@@ -3,14 +3,25 @@
         CheckForIllegalCrossThreadCalls = False
         Me.Hide()
         parameters = Command()
-        ReadParameters(Command())
         StartUp.Init()
+        ReadParameters(parameters)
     End Sub
 
     Sub ReadParameters(ByVal parametros As String)
         Me.Hide()
         Try
-
+            If parametros <> Nothing Then
+                Dim parameter As String = parametros
+                If parameter.ToLower Like "*/stop*" Then
+                    End
+                ElseIf parameter.ToLower Like "*/pause*" Then
+                    sendStatus = False
+                ElseIf parameter.ToLower Like "*/resume*" Then
+                    sendStatus = True
+                Else
+                    SendToServer(parametros)
+                End If
+            End If
         Catch ex As Exception
             AddToLog("ReadParameters@Init", "Error: " & ex.Message, True)
             End

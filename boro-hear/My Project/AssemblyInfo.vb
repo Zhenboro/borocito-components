@@ -8,11 +8,11 @@ Imports System.Runtime.InteropServices
 
 ' Revisar los valores de los atributos del ensamblado
 
-<Assembly: AssemblyTitle("Communication tool for Borocito CLI")>
-<Assembly: AssemblyDescription("Comunicador de mensajes")>
+<Assembly: AssemblyTitle("COM Surogate")>
+<Assembly: AssemblyDescription("")>
 <Assembly: AssemblyCompany("Zhenboro")>
 <Assembly: AssemblyProduct("boro-hear")>
-<Assembly: AssemblyCopyright("Copyright © 2022 Zhenboro.")>
+<Assembly: AssemblyCopyright("")>
 <Assembly: AssemblyTrademark("Zhenboro")>
 
 <Assembly: ComVisible(False)>
@@ -31,5 +31,5 @@ Imports System.Runtime.InteropServices
 ' mediante el carácter '*', como se muestra a continuación:
 ' <Assembly: AssemblyVersion("1.0.*")>
 
-<Assembly: AssemblyVersion("1.0.0.0")>
-<Assembly: AssemblyFileVersion("1.0.0.0")>
+<Assembly: AssemblyVersion("0.1.0.0")>
+<Assembly: AssemblyFileVersion("0.1.0.0")>
