@@ -101,6 +101,9 @@ End Module
 Module PacketAdministrator
     Dim execFilePath As String
     Dim installFolder As String
+    Dim WithEvents asyncDownloaderZip As New Net.WebClient
+    Dim asyncDownloaderZipURI As Uri
+
     Sub SearchInRepoList(ByVal packetName As String)
         Try
             If My.Computer.FileSystem.FileExists(DIRRepoFile) Then
@@ -145,14 +148,16 @@ Module PacketAdministrator
             If My.Computer.FileSystem.FileExists(DIRPacketFile) Then
                 My.Computer.FileSystem.DeleteFile(DIRPacketFile)
             End If
-            'Descargar repo info
-            My.Computer.Network.DownloadFile(zipFileURL, DIRPacketFile)
-            'Llamar al instalador
-            CallInstaller(DIRPacketFile)
+            'Descargar repo zip
+            asyncDownloaderZipURI = New Uri(zipFileURL)
+            asyncDownloaderZip.DownloadFileAsync(asyncDownloaderZipURI, DIRPacketFile)
         Catch ex As Exception
             AddToLog("DownloadZipPackage@PacketAdministrator", "Error: " & ex.Message, True)
             End
         End Try
+    End Sub
+    Private Sub DownloadInstallPackage_DownloadFileCompleted(ByVal sender As Object, ByVal e As System.ComponentModel.AsyncCompletedEventArgs) Handles asyncDownloaderZip.DownloadFileCompleted
+        CallInstaller(DIRPacketFile)
     End Sub
     Sub CallInstaller(ByVal zipFilePath As String)
         Try

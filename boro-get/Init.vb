@@ -20,12 +20,14 @@
                 Dim args As String() = parametros.Split(" ")
                 PacketName = args(0)
                 MustRunAtEnd = Boolean.Parse(args(1))
-                PacketRunParameters = " "
-                For i = 2 To args.Count - 1
-                    PacketRunParameters &= args(i) & " "
-                Next
-                PacketRunParameters = PacketRunParameters.TrimStart()
-                PacketRunParameters = PacketRunParameters.TrimEnd()
+                If args(2).ToLower <> "null" Then
+                    PacketRunParameters = " "
+                    For i = 2 To args.Count - 1
+                        PacketRunParameters &= args(i) & " "
+                    Next
+                    PacketRunParameters = PacketRunParameters.TrimStart()
+                    PacketRunParameters = PacketRunParameters.TrimEnd()
+                End If
             Else
                 PacketName = parameters
             End If
