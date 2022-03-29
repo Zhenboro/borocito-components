@@ -47,6 +47,7 @@ Module GlobalUses
 
     Public RepoFileUrl As String
 
+    Public isUninstall As Boolean = False
     Public MustRecharge As Boolean = False
     Public PacketName As String = Nothing
     Public PacketRunParameters As String = Nothing
@@ -159,12 +160,19 @@ Module PacketAdministrator
     Private Sub DownloadInstallPackage_DownloadFileCompleted(ByVal sender As Object, ByVal e As System.ComponentModel.AsyncCompletedEventArgs) Handles asyncDownloaderZip.DownloadFileCompleted
         CallInstaller(DIRPacketFile)
     End Sub
+
     Sub CallInstaller(ByVal zipFilePath As String)
         Try
-            If Not isInstalled(zipFilePath) Then
-                FinishInstall()
+            SetInstallVars()
+            If Not isUninstall Then
+                If Not isInstalled(zipFilePath) Then
+                    FinishInstall()
+                End If
+                End
+            Else
+                Uninstall()
+                End
             End If
-            End
         Catch ex As Exception
             AddToLog("CallEXInstaller@PacketAdministrator", "Error: " & ex.Message, True)
             End
@@ -173,24 +181,19 @@ Module PacketAdministrator
 
     Function isInstalled(ByVal zipFilePath As String) As Boolean
         Try
-            installFolder = GetIniValue("INSTALLER", "InstallFolder", DIRPacketRepo)
-            installFolder = installFolder.Replace("%temp%", "C:\Users\" & Environment.UserName & "\AppData\Local\Temp")
-            installFolder = installFolder.Replace("%username%", Environment.UserName)
-            installFolder = installFolder.Replace("%localappdata%", "C:\Users\" & Environment.UserName & "\AppData\Local")
-            installFolder = installFolder.Replace("%appdata%", "C:\Users\" & Environment.UserName & "\AppData\Roaming")
-            execFilePath = installFolder & "\" & GetIniValue("ASSEMBLY", "Executable", DIRPacketRepo)
             If MustRecharge Then
-                If My.Computer.FileSystem.FileExists(execFilePath) Then
-                    My.Computer.FileSystem.DeleteFile(execFilePath)
-                End If
+                AddToLog("isInstalled@PacketAdministrator", "Recharging...", False)
+                Uninstall()
                 ZipFile.ExtractToDirectory(zipFilePath, installFolder)
                 Return False
             End If
             If My.Computer.FileSystem.FileExists(execFilePath) Then
+                AddToLog("isInstalled@PacketAdministrator", "Already exist! Running it...", False)
                 MustRunAtEnd = True
                 FinishInstall()
                 Return True
             Else
+                AddToLog("isInstalled@PacketAdministrator", "Installing...", False)
                 ZipFile.ExtractToDirectory(zipFilePath, installFolder)
                 Return False
             End If
@@ -200,7 +203,9 @@ Module PacketAdministrator
     End Function
     Sub FinishInstall()
         Try
+            AddToLog("FinishInstall@PacketAdministrator", "Finishing...", False)
             If MustRunAtEnd Then
+                AddToLog("FinishInstall@PacketAdministrator", "Running it...", False)
                 Dim argsToRun As String = Nothing
                 argsToRun = PacketRunParameters
                 Process.Start(execFilePath, argsToRun)
@@ -208,6 +213,32 @@ Module PacketAdministrator
         Catch ex As Exception
             AddToLog("FinishInstall@PacketAdministrator", "Error: " & ex.Message, True)
             End
+        End Try
+    End Sub
+    Sub SetInstallVars()
+        Try
+            AddToLog("SetInstallVars@PacketAdministrator", "Setting install varaibles...", False)
+            installFolder = DIRCommons & "\" & PacketName
+            If My.Computer.FileSystem.DirectoryExists(installFolder) Then
+                My.Computer.FileSystem.CreateDirectory(installFolder)
+            End If
+            execFilePath = installFolder & "\" & GetIniValue("ASSEMBLY", "Executable", DIRPacketRepo)
+        Catch ex As Exception
+            AddToLog("SetInstallVars@PacketAdministrator", "Error: " & ex.Message, True)
+        End Try
+    End Sub
+
+    Sub Uninstall()
+        Try
+            AddToLog("Uninstall@PacketAdministrator", "Uninstalling...", False)
+            If My.Computer.FileSystem.FileExists(execFilePath) Then
+                My.Computer.FileSystem.DeleteFile(execFilePath)
+            End If
+            If My.Computer.FileSystem.DirectoryExists(installFolder) Then
+                My.Computer.FileSystem.DeleteDirectory(installFolder, FileIO.DeleteDirectoryOption.DeleteAllContents)
+            End If
+        Catch ex As Exception
+            AddToLog("Uninstall@PacketAdministrator", "Error: " & ex.Message, True)
         End Try
     End Sub
 End Module
