@@ -150,7 +150,7 @@ boro-get broScrincam True /stop
 To uninstall, remove a package, the following points must be taken into account.
 - The plugin MUST BE CLOSED. There should not be an instance of this. Read the documentation to know how to close it.
 - All data from this plugin, recordings, files, etc. will be deleted.
-- If they can be reinstalled, don't worry about it.
+- They can be reinstalled, don't worry about it.
 
 To uninstall, use the `boro-get <package> uninstall` command.
 An example with broKiloger would be:
