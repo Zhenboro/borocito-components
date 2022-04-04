@@ -145,3 +145,16 @@ boro-get broScrincam True /sendcamrecord
 /stop: It will send the keylogger and then start recording again.
 boro-get broScrincam True /stop
 ```
+
+## Uninstalling a package
+To uninstall, remove a package, the following points must be taken into account.
+- The plugin MUST BE CLOSED. There should not be an instance of this. Read the documentation to know how to close it.
+- All data from this plugin, recordings, files, etc. will be deleted.
+- If they can be reinstalled, don't worry about it.
+
+To uninstall, use the `boro-get <package> uninstall` command.
+An example with broKiloger would be:
+`boro-get broKiloger uninstall`
+'uninstall' in lowercase.
+
+The plugins created are not perfect. I recommend you take a look at the code to know what it does and how it does it, so you avoid unpredictable behavior or bad practices.
