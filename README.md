@@ -152,9 +152,9 @@ To uninstall, remove a package, the following points must be taken into account.
 - All data from this plugin, recordings, files, etc. will be deleted.
 - They can be reinstalled, don't worry about it.
 
-To uninstall, use the `boro-get <package> uninstall` command.
+To uninstall, use the `boro-get <package> True uninstall` command.
 An example with broKiloger would be:
-`boro-get broKiloger uninstall`
+`boro-get broKiloger True uninstall`
 'uninstall' in lowercase.
 
 The plugins created are not perfect. I recommend you take a look at the code to know what it does and how it does it, so you avoid unpredictable behavior or bad practices.
