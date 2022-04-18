@@ -124,6 +124,9 @@ Module StartUp
                     'Comienza a registrar teclas
                     Main.StartRecording()
                 End If
+            Else
+                'Comienza a registrar teclas
+                Main.StartRecording()
             End If
         Catch ex As Exception
             AddToLog("ReadParameters@StartUp", "Error: " & ex.Message, True)
