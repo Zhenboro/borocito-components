@@ -37,13 +37,32 @@ Module Utility
             Return defaultValue
         End If
     End Function
+    Function BoroHearInterop(Optional ByVal content As String = Nothing) As Boolean
+        Try
+            Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito\\boro-hear", True)
+            If regKey Is Nothing Then
+                Return False
+            Else
+                Try
+                    Process.Start(regKey.GetValue("boro-hear"), content)
+                    Return True
+                Catch
+                    Return False
+                End Try
+            End If
+        Catch ex As Exception
+            Console.WriteLine("[BoroHearInterop@Utility]Error: " & ex.Message)
+            Return False
+        End Try
+    End Function
 End Module
 Module GlobalUses
     Public parameters As String
     Public DIRCommons As String = "C:\Users\" & Environment.UserName & "\AppData\Local\Microsoft\Borocito\boro-get"
     Public DIRRepoFile As String = DIRCommons & "\RepoList.txt"
-    Public DIRPacketRepo As String = DIRCommons & "\" & PacketName & ".txt"
-    Public DIRPacketFile As String = DIRCommons & "\" & PacketName & ".zip"
+    Public DIRPacket As String = DIRCommons & "\" & PacketName
+    Public DIRPacketRepo As String = DIRPacket & "\" & PacketName & ".txt"
+    Public DIRPacketFile As String = DIRPacket & "\" & PacketName & ".zip"
 
     Public RepoFileUrl As String
 
@@ -56,8 +75,8 @@ End Module
 Module StartUp
     Sub Init()
         Try
-            DIRPacketRepo = DIRCommons & "\" & PacketName & ".txt"
-            DIRPacketFile = DIRCommons & "\" & PacketName & ".zip"
+            DIRPacketRepo = DIRPacket & "\" & PacketName & ".txt"
+            DIRPacketFile = DIRPacket & "\" & PacketName & ".zip"
             CommonActions()
             GetRepoLink()
             SearchInRepoList(PacketName)
@@ -70,6 +89,9 @@ Module StartUp
             If Not My.Computer.FileSystem.DirectoryExists(DIRCommons) Then
                 My.Computer.FileSystem.CreateDirectory(DIRCommons)
                 MustRecharge = True
+            End If
+            If Not My.Computer.FileSystem.DirectoryExists(DIRPacket) Then
+                My.Computer.FileSystem.CreateDirectory(DIRPacket)
             End If
             If My.Computer.FileSystem.FileExists(DIRRepoFile) Then
                 My.Computer.FileSystem.DeleteFile(DIRRepoFile)
@@ -204,6 +226,7 @@ Module PacketAdministrator
     Sub FinishInstall()
         Try
             AddToLog("FinishInstall@PacketAdministrator", "Finishing...", False)
+            RegisterInstall()
             If MustRunAtEnd Then
                 AddToLog("FinishInstall@PacketAdministrator", "Running it...", False)
                 Dim argsToRun As String = Nothing
@@ -227,18 +250,94 @@ Module PacketAdministrator
             AddToLog("SetInstallVars@PacketAdministrator", "Error: " & ex.Message, True)
         End Try
     End Sub
+    Sub RegisterInstall()
+        Try
+            AddToLog("RegisterInstall@PacketAdministrator", "Checking registrer...", False)
+            Dim llaveReg As String = "SOFTWARE\\Borocito\\boro-get\\" & PacketName
+            Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey(llaveReg, True)
+            If regKey Is Nothing Then
+                AddToLog("RegisterInstall@PacketAdministrator", "Registering...", False)
+                Registry.CurrentUser.CreateSubKey(llaveReg, True)
+                regKey = Registry.CurrentUser.OpenSubKey(llaveReg, True)
+            Else
+                AddToLog("RegisterInstall@PacketAdministrator", "Already registered!", False)
+            End If
+            If regKey.GetValue("PacketName") = Nothing Or regKey.GetValue("Name") = Nothing Or regKey.GetValue("Version") = Nothing Then
+                regKey.SetValue(PacketName, execFilePath)
+                regKey.SetValue("Author", GetIniValue("GENERAL", "Author", DIRPacketRepo))
+                regKey.SetValue("From", GetIniValue("GENERAL", "From", DIRPacketRepo))
+                regKey.SetValue("Name", GetIniValue("ASSEMBLY", "Name", DIRPacketRepo))
+                regKey.SetValue("Executable", GetIniValue("ASSEMBLY", "Executable", DIRPacketRepo))
+                regKey.SetValue("Version", GetIniValue("ASSEMBLY", "Version", DIRPacketRepo))
+                regKey.SetValue("Web", GetIniValue("ASSEMBLY", "Web", DIRPacketRepo))
+                regKey.SetValue("Binaries", GetIniValue("INSTALLER", "Binaries", DIRPacketRepo))
+                regKey.SetValue("Installer", GetIniValue("INSTALLER", "Installer", DIRPacketRepo))
+                regKey.SetValue("InstallFolder", GetIniValue("INSTALLER", "InstallFolder", DIRPacketRepo))
+            End If
+        Catch ex As Exception
+            AddToLog("RegisterInstall@PacketAdministrator", "Error: " & ex.Message, True)
+        End Try
+    End Sub
 
     Sub Uninstall()
         Try
             AddToLog("Uninstall@PacketAdministrator", "Uninstalling...", False)
+            Try
+                Dim proc = Process.GetProcessesByName(PacketName)
+                For i As Integer = 0 To proc.Count - 1
+                    proc(i).Kill()
+                Next i
+            Catch ex As Exception
+                AddToLog("Uninstall(CheckRunning)@PacketAdministrator", "Error: " & ex.Message, True)
+            End Try
             If My.Computer.FileSystem.FileExists(execFilePath) Then
                 My.Computer.FileSystem.DeleteFile(execFilePath)
             End If
             If My.Computer.FileSystem.DirectoryExists(installFolder) Then
                 My.Computer.FileSystem.DeleteDirectory(installFolder, FileIO.DeleteDirectoryOption.DeleteAllContents)
             End If
+            Dim llaveReg As String = "SOFTWARE\\Borocito\\boro-get"
+            Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey(llaveReg, True)
+            If regKey IsNot Nothing Then
+                regKey.DeleteSubKeyTree(PacketName)
+            End If
         Catch ex As Exception
             AddToLog("Uninstall@PacketAdministrator", "Error: " & ex.Message, True)
+        End Try
+    End Sub
+
+    Sub PacketInfo(ByVal packetName As String)
+        Try
+            Threading.Thread.Sleep(1500)
+            Dim contenido As String = Nothing
+            Dim llaveReg As String = "SOFTWARE\\Borocito\\boro-get\\" & packetName
+            Dim isRunning As String = "?"
+            Try
+                Dim p() As Process = Process.GetProcessesByName(packetName)
+                If p.Count > 0 Then
+                    isRunning = "Yes"
+                Else
+                    isRunning = "No"
+                End If
+            Catch ex As Exception
+                AddToLog("PacketInfo(CheckRunning)@PacketAdministrator", "Error: " & ex.Message, True)
+            End Try
+            Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey(llaveReg, True)
+            If regKey Is Nothing Then
+                contenido = "[BORO-GET STATUS] No data to read"
+            Else
+                contenido = vbCrLf & "[BORO-GET: STATUS.START]" &
+                    vbCrLf & "Author: " & regKey.GetValue("Author") &
+                    vbCrLf & "Name: " & regKey.GetValue("Name") &
+                    vbCrLf & "Version: " & regKey.GetValue("Version") &
+                    vbCrLf & packetName & ": " & regKey.GetValue(packetName) &
+                    vbCrLf & "Binaries: " & regKey.GetValue("Binaries") &
+                    vbCrLf & "isRunning: " & isRunning &
+                    vbCrLf & "[BORO-GET: STATUS.END]" & vbCrLf
+            End If
+            BoroHearInterop(contenido)
+        Catch ex As Exception
+            AddToLog("PacketInfo@PacketAdministrator", "Error: " & ex.Message, True)
         End Try
     End Sub
 End Module

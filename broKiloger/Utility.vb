@@ -68,8 +68,20 @@ Module Memory
             OwnerServer = regKey.GetValue("OwnerServer")
             UID = regKey.GetValue("UID")
             HttpOwnerServer = "http://" & OwnerServer
+            RegisterInstance()
         Catch ex As Exception
             AddToLog("LoadRegedit@Memory", "Error: " & ex.Message, True)
+        End Try
+    End Sub
+    Sub RegisterInstance()
+        Try
+            Dim llaveReg As String = "SOFTWARE\\Borocito\\boro-get\\" & My.Application.Info.AssemblyName
+            Dim registerKey As RegistryKey = Registry.CurrentUser.OpenSubKey(llaveReg, True)
+            If registerKey IsNot Nothing Then
+                registerKey.SetValue("Version", My.Application.Info.Version.ToString & " (" & Application.ProductVersion & ")")
+            End If
+        Catch ex As Exception
+            AddToLog("RegisterInstance@Memory", "Error: " & ex.Message, True)
         End Try
     End Sub
 End Module

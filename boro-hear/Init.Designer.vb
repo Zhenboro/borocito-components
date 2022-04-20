@@ -35,8 +35,11 @@ Partial Class Init
         Me.MinimizeBox = False
         Me.Name = "Init"
         Me.Opacity = 0R
+        Me.ShowIcon = False
+        Me.ShowInTaskbar = False
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Init"
+        Me.WindowState = System.Windows.Forms.FormWindowState.Minimized
         Me.ResumeLayout(False)
 
     End Sub

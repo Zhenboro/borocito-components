@@ -8,7 +8,12 @@ Namespace My
     ' NetworkAvailabilityChanged: Se genera cuando se conecta o desconecta la conexión de red.
     Partial Friend Class MyApplication
         Private Sub MyApplication_StartupNextInstance(sender As Object, e As StartupNextInstanceEventArgs) Handles Me.StartupNextInstance
-            Init.ReadParameters(e.CommandLine.Item(0).ToString)
+            Dim contenido As String = Nothing
+            For Each item As String In e.CommandLine
+                contenido &= item & " "
+            Next
+            Init.ReadParameters(contenido)
+            'Init.ReadParameters(e.CommandLine.Item(0).ToString)
         End Sub
     End Class
 End Namespace

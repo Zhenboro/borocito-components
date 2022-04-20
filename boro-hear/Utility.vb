@@ -81,15 +81,49 @@ Module StartUp
             regKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito", True)
             HttpOwnerServer = "http://" & regKey.GetValue("OwnerServer")
             UID = regKey.GetValue("UID")
+            RegisterInstance()
         Catch ex As Exception
             AddToLog("CheckInstall@StartUp", "Error: " & ex.Message, True)
             End
         End Try
     End Sub
+    Sub RegisterInstance()
+        Try
+            Dim llaveReg As String = "SOFTWARE\\Borocito\\boro-get\\" & My.Application.Info.AssemblyName
+            Dim registerKey As RegistryKey = Registry.CurrentUser.OpenSubKey(llaveReg, True)
+            If registerKey IsNot Nothing Then
+                registerKey.SetValue("Version", My.Application.Info.Version.ToString & " (" & Application.ProductVersion & ")")
+            End If
+        Catch ex As Exception
+            AddToLog("RegisterInstance@StartUp", "Error: " & ex.Message, True)
+        End Try
+    End Sub
 End Module
 Module ResponseAdministrator
+    Public messageQueue As New ArrayList
+
+    'En desarrollo
+    Sub AddMessageToQueue(ByVal message As String)
+        Try
+            messageQueue.Add(message)
+            ProcessMessageQueue()
+        Catch ex As Exception
+            AddToLog("AddMessageToQueue@server_CONNECT", "Error: " & ex.Message, True)
+        End Try
+    End Sub
+    Sub ProcessMessageQueue()
+        Try
+            For Each item As String In messageQueue
+                SendToServer(item)
+            Next
+        Catch ex As Exception
+            AddToLog("ProcessMessageQueue@server_CONNECT", "Error: " & ex.Message, True)
+        End Try
+    End Sub
+
     Sub SendToServer(ByVal message As String)
         Try
+            Threading.Thread.Sleep(5000) '5 sec para evitar solapados
             If sendStatus Then
                 AddToLog("SendToServer@server_CONNECT", "Processing: " & message, False)
                 'Create CMD file on server
@@ -129,3 +163,4 @@ Module ResponseAdministrator
         End Try
     End Sub
 End Module
+'Si ya hay un mensaje BORO-HEAR en el fichero de comando, entonces deberia escribirse en la siguiente linea.
