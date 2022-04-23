@@ -10,7 +10,7 @@ Module Utility
     Sub AddToLog(ByVal from As String, ByVal content As String, Optional ByVal flag As Boolean = False)
         Try
             Dim OverWrite As Boolean = False
-            If My.Computer.FileSystem.FileExists(DIRCommons & "\" & My.Application.Info.AssemblyName & ".log") Then
+            If My.Computer.FileSystem.FileExists(DIRHome & "\" & My.Application.Info.AssemblyName & ".log") Then
                 OverWrite = True
             End If
             Dim finalContent As String = Nothing
@@ -21,7 +21,7 @@ Module Utility
             tlmContent = tlmContent & Message & vbCrLf
             Console.WriteLine("[" & from & "]" & finalContent & " " & content)
             Try
-                My.Computer.FileSystem.WriteAllText(DIRCommons & "\" & My.Application.Info.AssemblyName & ".log", vbCrLf & Message, OverWrite)
+                My.Computer.FileSystem.WriteAllText(DIRHome & "\" & My.Application.Info.AssemblyName & ".log", vbCrLf & Message, OverWrite)
             Catch
             End Try
         Catch ex As Exception
@@ -59,7 +59,7 @@ Module Memory
 End Module
 Module StartUp
     Sub Init()
-        AddToLog("Init", "broEstoraje " & My.Application.Info.Version.ToString & " (" & Application.ProductVersion & ")" & " has started! " & DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy"), True)
+        AddToLog("Init", My.Application.Info.AssemblyName & " " & My.Application.Info.Version.ToString & " (" & Application.ProductVersion & ")" & " has started! " & DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy"), True)
         Try
             CommonActions()
             'Cargamos los datos del registro de Windows

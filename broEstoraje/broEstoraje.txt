@@ -1,0 +1,44 @@
+BroEstoraje
+Administrador de ficheros remoto
+
+	! 1) Comprimir directorio a .zip
+		> /DirToZip <path> <zip>
+			'path' es comprimido
+			'zip' es el comprimido de 'path'
+
+	! 2) Descomprimir .zip a directorio
+		> /ZipToDir <zip> <path>
+			'zip' es el comprimido
+			'path' es donde se descomprimira 'zip'
+
+	- 3) Comprir archivo a .zip
+	- 4) Descomprimir .zip a archivo
+	
+	- 5) Leer contenido de un archivo
+	- 6) Escribir contenido en un archivo
+
+	- 7) Envio de ficheros .zip a servidor
+	! 8) Envio de ficheros a servidor
+
+	? 9) Sistema de gestor de archivos remoto (RMTFS ref)
+
+	! 10) Renombrar archivos/carpetas
+		> /RenameFile <filePath> <fileName>
+			El archivo 'filePath' se llamara 'fileName'
+		> /RenameDirectory <dirPath> <dirName>
+			El directorio 'dirPath' se llamara 'dirName'
+
+	! 11) Copiar archivos/carpetas
+		> /CopyFile <filePath> <copiedFilePath>
+			El archivo 'filePath' se copiara en 'copiedFilePath'
+		> /CopyDirectory <dirPath> <copiedDirPath>
+			El directorio 'dirPath' se copiara en 'copiedDirPath'
+
+	! 12) Mover archivos/carpetas
+		> /MoveFile <filePath> <newFilePath>
+			El archivo 'filePath' se movera a 'newFilePath'
+		> /MoveDirectory <dirPath> <newDirPath>
+			El directorio 'dirPath' se movera a 'newDirPath'
+
+	13) Cifrado/Descifrado de archivos
+	14) Cifrado/Descifrado de carpetas

