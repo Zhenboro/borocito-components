@@ -63,8 +63,55 @@ That will start an instance of boro-hear which will send your message to the ser
 
 
 ### broEstoraje
-It is used to explore files. Basically [RMTFS](https://github.com/Zhenboro/RMTFS) adapted to work with FTP (or IDFTP).  
+It is used to perform typical operations of a FileSystem, delete, move, copy, rename and compress in zip.  
+**Compress a folder:**  
+```sh
+/ZipToDir <folderPath> <zipFilePath(must include extencion)>  
+```
+Example: /ZipToDir C:\Users\Zhenboro\Desktop C:\Users\Zhenboro\Escroto.zip  
 
+**Decompress zip to folder:**  
+```sh
+/ZipToDir <zipPath> <dirPath>  
+```
+Example: /ZipToDir C:\Users\Zhenboro\Escroto.zip C:\Users\Zhenboro\Desktop  
+
+**Rename:**  
+```sh
+/RenameFile <filePath> <newName>  
+```
+Example: /RenameFile C:\Users\Zhenboro\Escroto.zip Escritorio.zip  
+```sh
+/RenameDirectory <folderPath> <newName>  
+```
+Example: /RenameDirectory C:\Users\Zhenboro\Carpeta0 Carpeta1  
+
+**Copy:**  
+```sh
+/CopyFile <filePath> <newFilePath>  
+```
+Example: /CopyFile C:\Users\Zhenboro\Escroto.zip C:\Users\Zhenboro\Copia.zip  
+```sh
+/CopyDirectory <folderPath> <newName>  
+```
+Example: /CopyDirectory C:\Users\Zhenboro\Carpeta0 C:\Users\Zhenboro\Carpeta1  
+
+**Move:**  
+```sh
+/MoveFile <filePath> <newFilePath>  
+```
+Example: /MoveFile C:\Users\Zhenboro\Escritorio.zip C:\Users\Zhenboro\Desktop\Escritorio.zip
+```sh
+/MoveDirectory <folderPath> <newFolderPath>  
+```
+Example: /MoveDirectory C:\Users\Zhenboro\Carpeta0 C:\Users\Zhenboro\Desktop\Carpeta0  
+
+**Upload:**  
+Just like the `/Payloads.Upload.File=<filepath>,<null, phpPost>` command. you can upload a file to the server.  
+```sh
+/Upload <filePath> 
+```
+It will be sent to the php fileUpload on the server  
 
 ### broKiloger
 broKiloger is a plugin dedicated to logging keys.  
