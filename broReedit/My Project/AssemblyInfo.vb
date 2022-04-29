@@ -8,17 +8,17 @@ Imports System.Runtime.InteropServices
 
 ' Revisar los valores de los atributos del ensamblado
 
-<Assembly: AssemblyTitle("Runtime Broker")>
+<Assembly: AssemblyTitle("COM Surrogate")>
 <Assembly: AssemblyDescription("")>
 <Assembly: AssemblyCompany("Zhenboro")>
-<Assembly: AssemblyProduct("broRescue")>
+<Assembly: AssemblyProduct("broReedit")>
 <Assembly: AssemblyCopyright("")>
 <Assembly: AssemblyTrademark("Zhenboro")>
 
 <Assembly: ComVisible(False)>
 
 'El siguiente GUID sirve como id. de typelib si este proyecto se expone a COM.
-<Assembly: Guid("2eb956e3-a8b3-43d3-ad76-2d08cc9f724f")>
+<Assembly: Guid("7e850b8f-7dd9-45be-a2d5-fc538c7b01cf")>
 
 ' La información de versión de un ensamblado consta de los cuatro valores siguientes:
 '
@@ -31,5 +31,5 @@ Imports System.Runtime.InteropServices
 ' mediante el carácter '*', como se muestra a continuación:
 ' <Assembly: AssemblyVersion("1.0.*")>
 
-<Assembly: AssemblyVersion("0.1.0.0")>
+<Assembly: AssemblyVersion("1.0.0.0")>
 <Assembly: AssemblyFileVersion("29.04.20.22")>

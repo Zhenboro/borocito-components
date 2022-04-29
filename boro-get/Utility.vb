@@ -3,11 +3,10 @@ Imports System.Text
 Imports System.IO.Compression
 Imports Microsoft.Win32
 Module Utility
-    Public tlmContent As String
     Sub AddToLog(ByVal from As String, ByVal content As String, Optional ByVal flag As Boolean = False)
         Try
             Dim OverWrite As Boolean = False
-            If My.Computer.FileSystem.FileExists(DIRCommons & "\boro-get.log") Then
+            If My.Computer.FileSystem.FileExists(DIRCommons & "\" & My.Application.Info.AssemblyName & ".log") Then
                 OverWrite = True
             End If
             Dim finalContent As String = Nothing
@@ -15,10 +14,9 @@ Module Utility
                 finalContent = " [!!!]"
             End If
             Dim Message As String = DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy") & finalContent & " [" & from & "] " & content
-            tlmContent = tlmContent & Message & vbCrLf
             Console.WriteLine("[" & from & "]" & finalContent & " " & content)
             Try
-                My.Computer.FileSystem.WriteAllText(DIRCommons & "\boro-get.log", vbCrLf & Message, OverWrite)
+                My.Computer.FileSystem.WriteAllText(DIRCommons & "\" & My.Application.Info.AssemblyName & ".log", vbCrLf & Message, OverWrite)
             Catch
             End Try
         Catch ex As Exception
@@ -138,6 +136,7 @@ Module PacketAdministrator
     Dim installFolder As String
     Dim WithEvents asyncDownloaderZip As New Net.WebClient
     Dim asyncDownloaderZipURI As Uri
+    Dim isAlreadyInstalled As Boolean
 
     Sub SearchInRepoList(ByVal packetName As String)
         Try
@@ -223,11 +222,13 @@ Module PacketAdministrator
             End If
             If My.Computer.FileSystem.FileExists(execFilePath) Then
                 AddToLog("isInstalled@PacketAdministrator", "Already exist! Running it...", False)
+                isAlreadyInstalled = True
                 MustRunAtEnd = True
                 FinishInstall()
                 Return True
             Else
                 AddToLog("isInstalled@PacketAdministrator", "Installing...", False)
+                isAlreadyInstalled = False
                 ZipFile.ExtractToDirectory(zipFilePath, installFolder)
                 Return False
             End If
@@ -245,13 +246,15 @@ Module PacketAdministrator
                 argsToRun = PacketRunParameters
                 Process.Start(execFilePath, argsToRun)
             End If
-            Dim contenido As String = Nothing
-            contenido = vbCrLf & "[BORO-GET: PACKET.ADMIN]" &
+            If Not isAlreadyInstalled Then
+                Dim contenido As String = Nothing
+                contenido = vbCrLf & "[BORO-GET: PACKET.ADMIN]" &
                     vbCrLf & PacketName & " has been installed!" &
                     vbCrLf & "Run: " & MustRunAtEnd &
                     vbCrLf & "Parameters: " & PacketRunParameters &
-            vbCrLf & "[BORO-GET: PACKET.ADMIN]" & vbCrLf
-            BoroHearInterop(contenido)
+                    vbCrLf & "[BORO-GET: PACKET.ADMIN]" & vbCrLf
+                BoroHearInterop(contenido)
+            End If
         Catch ex As Exception
             AddToLog("FinishInstall@PacketAdministrator", "Error: " & ex.Message, True)
             End

@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{639D89BF-409C-418E-A4A2-7831911167B0}</ProjectGuid>
+    <ProjectGuid>{E04D1A9C-A92D-4022-86A0-93C8DD8005CE}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <StartupObject>broRescue.My.MyApplication</StartupObject>
-    <RootNamespace>broRescue</RootNamespace>
-    <AssemblyName>broRescue</AssemblyName>
+    <StartupObject>broReedit.My.MyApplication</StartupObject>
+    <RootNamespace>broReedit</RootNamespace>
+    <AssemblyName>broReedit</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>WindowsForms</MyType>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
@@ -22,8 +22,9 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\Debug\</OutputPath>
-    <DocumentationFile>broRescue.xml</DocumentationFile>
+    <DocumentationFile>broReedit.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -32,7 +33,7 @@
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DocumentationFile>broRescue.xml</DocumentationFile>
+    <DocumentationFile>broReedit.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
@@ -96,6 +97,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="Utility.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Init.resx">

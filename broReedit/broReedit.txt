@@ -1,0 +1,52 @@
+broReedit Editor de registro de Windows
+
+
+
+Seleccionando una HK
+	/SelectHKey <HK>
+		Ej: /SelectHKey CurrentUser
+
+Selecionando un K
+	/SelectKey <K>
+		Ej: /SelectKey SOFTWARE\Borocito
+
+Obteniendo un valor
+	/GetValue <Name>
+		Ej: /GetValue OwnerServer
+
+Ingresando un valor
+	/SetValue <Name> <Value> <Type>
+		Ej: /SetValue OwnerServer chemic-jug.000webhostapp.com/Borocito null
+		null = Tipo de valor (vacio), defecto String (1 = REG_SZ)
+			-1 = None
+			0 = Unknown
+			1 = String
+			2 = ExpandString
+			3 = Binary
+			4 = DWord
+			7 = MultiString
+			11 = QWord
+
+Creando un K
+	/CreateSubKey <K>
+		Ej: /CreateSubKey Control
+
+Eliminando un valor
+	/DeleteValue <Name>
+		Ej: /DeleteValue OwnerServer
+
+Eliminando un K
+	/DeleteSubKey <K>
+		Ej: /DeleteSubKey boro-get
+			Si la llave boro-get no tiene subclaves, entonces se eliminara.
+			Si la llave boro-get tiene subclaves, no se eliminaran.
+				Se generara un error. Mejor usar /DeleteSubKey
+					o eliminar subllave por subllave
+
+Eliminando un arbol K
+	/DeleteSubKeyTree <K>
+		Ej: /DeleteSubKey boro-get
+			Si la llave boro-get tiene subllaves, entonces se eliminaran
+
+Cerrando la instancia
+	/Stop, /Close, /Exit
