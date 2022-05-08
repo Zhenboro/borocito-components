@@ -170,6 +170,7 @@ Public Class Init
             Else
                 Try
                     If content <> Nothing Then
+                        'AddToLog("BoroHearInterop", content, False)
                         Process.Start(regKey.GetValue("boro-hear"), content)
                     End If
                     Return True

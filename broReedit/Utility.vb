@@ -32,6 +32,7 @@ Module Utility
             Else
                 Try
                     If content <> Nothing Then
+                        AddToLog("BoroHearInterop", content, False)
                         Process.Start(regKey.GetValue("boro-hear"), content)
                     End If
                     Return True
@@ -40,7 +41,7 @@ Module Utility
                 End Try
             End If
         Catch ex As Exception
-            AddToLog("BoroHearInterop@Utility", "Error: " & ex.Message, True)
+            Console.WriteLine("[BoroHearInterop@Init]Error: " & ex.Message)
             Return False
         End Try
     End Function
