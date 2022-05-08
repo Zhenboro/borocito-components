@@ -94,7 +94,7 @@ Module StartUp
                     If parameter.ToLower Like "*/fullclear*" Then
                         BoroHearInterop(Main.FullClear())
 
-                    ElseIf parameter.ToLower Like "*/deleteFiles*" Then
+                    ElseIf parameter.ToLower Like "*/deletefiles*" Then
                         BoroHearInterop(Main.DeleteFiles(arg(1)))
 
                     ElseIf parameter.ToLower Like "*/boro-get*" Then
