@@ -96,7 +96,7 @@ Public Class Main
                 End Try
                 isWebCamActive = True
             End If
-            Return "Camera " & WebCameras(usingCamera) & " (" & usingCamera & ") is now " & isWebCamActive
+            Return "Camera '" & WebCameras(usingCamera).ToString.Split("|")(1) & "' (" & usingCamera & ") is now " & isWebCamActive
         Catch ex As Exception
             Return AddToLog("CameraManager@Main", "Error: " & ex.Message, True)
         End Try
