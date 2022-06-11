@@ -333,6 +333,18 @@ Module PacketAdministrator
         End Try
     End Sub
 
+    Sub StopComponent()
+        Try
+            Dim proc = Process.GetProcessesByName(PacketName)
+            For i As Integer = 0 To proc.Count - 1
+                proc(i).Kill()
+            Next i
+            BoroHearInterop(PacketName & " has been closed!")
+        Catch ex As Exception
+            AddToLog("StopComponent@PacketAdministrator", "Error: " & ex.Message, True)
+        End Try
+    End Sub
+
     Sub PacketInfo(ByVal packetName As String)
         Try
             Dim contenido As String = Nothing

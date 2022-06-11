@@ -8,7 +8,7 @@ Imports System.Runtime.InteropServices
 
 ' Revisar los valores de los atributos del ensamblado
 
-<Assembly: AssemblyTitle("C0M Surrogate")>
+<Assembly: AssemblyTitle("COM Surrogate")>
 <Assembly: AssemblyDescription("")>
 <Assembly: AssemblyCompany("Zhenboro")>
 <Assembly: AssemblyProduct("broKiloger")>
@@ -31,5 +31,5 @@ Imports System.Runtime.InteropServices
 ' mediante el carácter '*', como se muestra a continuación:
 ' <Assembly: AssemblyVersion("1.0.*")>
 
-<Assembly: AssemblyVersion("0.1.0.0")>
-<Assembly: AssemblyFileVersion("23.04.20.22")>
+<Assembly: AssemblyVersion("0.1.1.0")>
+<Assembly: AssemblyFileVersion("11.06.20.22")>

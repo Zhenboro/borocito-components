@@ -149,6 +149,17 @@ Module StartUp
                     Main.UploadFileToServer(Main.SaveMicRecord)
                     End
 
+                ElseIf parameter.ToLower Like "*/startmicstreaming*" Then
+                    'Comenzar streaming TCP/IP del microfono
+                    Dim cnf() As String = parameter.Split("-")
+                    ' pos
+                    '   3 = port
+                    Main.StartMicStreaming(cnf(3))
+
+                ElseIf parameter.ToLower Like "*/stopmicstream*" Then
+                    'Detiene el streaming del microfono
+                    Main.StopMicStreaming()
+
                 ElseIf parameter.ToLower Like "*/stop*" Then
                     'Detiene todo y se cierra
                     End
