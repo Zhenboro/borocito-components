@@ -16,15 +16,16 @@ Let's start with the basics, installing boro-get on the selected computer:
 boro-get has a defined command structure.  
 This is:  
 ```sh
-	boro-get <packetName> <runOrNot(boolean)> <parameters...>
+boro-get <packetName> <runOrNot(boolean)> <parameters...>
 ```
 An example will be:  
 ```sh
-	boro-get broArbitra True -init C:\...\Code.vb
+boro-get broArbitra True -init C:\...\Code.vb
 ```
 |boro-get|packetName|runOrNot|parameters|
 |--|--|--|--|
 |boro-get|broArbitra|True|-init C:\\...\Code.vb
+
 **Its that simple.**  
 Obviusly, with already-installed components, u can use `<set cmd boro-get` to manage the component without prefix.  
 An example will be:  
