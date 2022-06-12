@@ -116,6 +116,12 @@ Module StartUp
                         BoroHearInterop(Main.Initializer(args(1), args(2)))
                     End If
 
+                ElseIf parameter.ToLower.StartsWith("/addref") Then
+                    BoroHearInterop(AddToReference(args(1)))
+
+                ElseIf parameter.ToLower.StartsWith("/delref") Then
+                    BoroHearInterop(RemoveFromReference(args(1)))
+
                 ElseIf parameter.ToLower.StartsWith("/call") Then
                     If args.Count = 2 Then 'no param
                         BoroHearInterop(Main.ArbitraCall())
@@ -136,6 +142,55 @@ End Module
 Module Arbitra
     Public fileCodeProvider As String
     Public isInitialized As Boolean = False
+    Public ReferencesList As New ArrayList
+
+    Function AddToReference(ByVal refPath As String) As String
+        Try
+            If refPath.ToLower = "basic" Then
+                ReferencesList.Add("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.dll")
+                ReferencesList.Add("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.Core.dll")
+                ReferencesList.Add("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.Data.dll")
+                ReferencesList.Add("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.Data.DataSetExtensions.dll")
+                ReferencesList.Add("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.Deployment.dll")
+                ReferencesList.Add("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.Drawing.dll")
+                ReferencesList.Add("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.Net.Http.dll")
+                ReferencesList.Add("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.Windows.Forms.dll")
+                ReferencesList.Add("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.Xml.dll")
+                ReferencesList.Add("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.Xml.Linq.dll")
+                Return "Basic references added!"
+            Else
+                refPath = refPath.Replace("_", " ")
+                ReferencesList.Add(refPath)
+            End If
+            Return "Reference added!"
+        Catch ex As Exception
+            Return AddToLog("AddToReference@Arbitra", "Error: " & ex.Message, True)
+        End Try
+    End Function
+    Function RemoveFromReference(ByVal refPath As String) As String
+        Try
+            If refPath.ToLower = "basic" Then
+                ReferencesList.Remove("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.dll")
+                ReferencesList.Remove("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.Core.dll")
+                ReferencesList.Remove("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.Data.dll")
+                ReferencesList.Remove("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.Data.DataSetExtensions.dll")
+                ReferencesList.Remove("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.Deployment.dll")
+                ReferencesList.Remove("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.Drawing.dll")
+                ReferencesList.Remove("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.Net.Http.dll")
+                ReferencesList.Remove("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.Windows.Forms.dll")
+                ReferencesList.Remove("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.Xml.dll")
+                ReferencesList.Remove("C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\System.Xml.Linq.dll")
+                Return "Basic references removed!"
+            Else
+                refPath = refPath.Replace("_", " ")
+                ReferencesList.Remove(refPath)
+            End If
+            ReferencesList.Remove(refPath)
+            Return "Reference removed!"
+        Catch ex As Exception
+            Return AddToLog("RemoveFromReference@Arbitra", "Error: " & ex.Message, True)
+        End Try
+    End Function
 
     Sub GetCodePathFile(ByVal thingPATH As String)
         Try

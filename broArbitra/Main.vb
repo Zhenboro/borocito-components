@@ -40,7 +40,11 @@ Public Class Main
                 Parametros.GenerateInMemory = True
                 Parametros.GenerateExecutable = False
                 'Parametros.OutputAssembly = ""
-                'Parametros.ReferencedAssemblies.Add("dll path") 'referencias
+                If ReferencesList.Count > 0 Then
+                    For Each item As String In ReferencesList
+                        Parametros.ReferencedAssemblies.Add(item)
+                    Next
+                End If
                 Resultado = Compilador.CompileAssemblyFromSource(Parametros, My.Computer.FileSystem.ReadAllText(fileCodeProvider))
                 DLL = Resultado.CompiledAssembly
 

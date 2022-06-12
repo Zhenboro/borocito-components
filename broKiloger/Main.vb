@@ -100,7 +100,7 @@ Public Class Main
         Try
             KeyProc = New KeyProcessor
             Dim threadKeyProc As Threading.Thread = New Threading.Thread(New Threading.ParameterizedThreadStart(AddressOf KeyProc.ProcesarTeclas))
-            threadKeyProc.Start(theString)
+            threadKeyProc.Start(theString.TrimEnd)
         Catch ex As Exception
             AddToLog("StartKeyProc@Main", "Error: " & ex.Message, True)
         End Try
