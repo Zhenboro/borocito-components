@@ -30,5 +30,5 @@ boro-get broArbitra True -init C:\...\Code.vb
 Obviusly, with already-installed components, u can use `<set cmd boro-get` to manage the component without prefix.  
 An example will be:  
 ```sh
-	broArbitra -init /firstStart
+broArbitra -init /firstStart
 ```
