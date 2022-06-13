@@ -58,3 +58,6 @@ Have you done what you should? You can kill the instance with:
 -kill
 ```
 broArbitra will close. The instance too.
+
+### WARNING
+**The plugins created are not perfect. I recommend you take a look at the code to know what it does and how it does it, so you avoid unpredictable behavior or bad practices.**

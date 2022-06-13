@@ -1,5 +1,5 @@
 # borocito-components
-Complementos para Borocito CLI  
+Complementos/Plugins/Componentes para Borocito CLI  
 
 ## Complements
 These plugins were created to enrich the experience with BorocitoCLI.  
@@ -23,6 +23,27 @@ I really recommend you use my repository, upload updates with improvements, etc.
 
 **Remember: it's just a repository. I can not steal the victims and either receive files either. It's just read-only**  
 
+---
+# WARNING
+This README will be deprecated for the next update. Now the documentation of the components will be in their respective README of their folders.
+
+|Component|Information|Actions|
+|--|--|--|
+|boro-get|Packet manager|[View](https://github.com/Zhenboro/borocito-components/tree/dev/boro-get)|
+|boro-hear|Response manager|[View](https://github.com/Zhenboro/borocito-components/tree/dev/boro-hear)|
+|broArbitra|Arbitrary Code Supplier|[View](https://github.com/Zhenboro/borocito-components/tree/dev/broArbitra)|
+|broEstoraje|FileSystem Operations|[View](https://github.com/Zhenboro/borocito-components/tree/dev/broEstoraje)|
+|broFaierwoll|Firewall rule creator|[View](https://github.com/Zhenboro/borocito-components/tree/dev/broFaierwoll)|
+|broKioger|Keylogger|[View](https://github.com/Zhenboro/borocito-components/tree/dev/broKiloger)|
+|broMaintainer|Maintainer for BorocitoCLI|[View](https://github.com/Zhenboro/borocito-components/tree/dev/broMaintainer)|
+|broReedit|Windows Registry Editor|[View](https://github.com/Zhenboro/borocito-components/tree/dev/broReedit)|
+|broRescue|Emergency Component for BorocitoCLI|[View](https://github.com/Zhenboro/borocito-components/tree/dev/broRescue)|
+|broScrincam|Device Spy IO utilities|[View](https://github.com/Zhenboro/borocito-components/tree/dev/broScrincam)|
+
+**The documentation of each plugin will be in its respective README inside its folder. This general README will no longer be updated.**
+
+---
+---
 ---
 ### boro-get
 This must be installed, by default it is not implemented. It should be installed using the command `boro-get install`, to check if it is installed or not, use `boro-get status`, if it is already installed, great!  

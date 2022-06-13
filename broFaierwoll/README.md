@@ -24,3 +24,6 @@ Example
 ```sh
 /simple rmtdsk_tcp 15243 True
 ```
+
+### WARNING
+**The plugins created are not perfect. I recommend you take a look at the code to know what it does and how it does it, so you avoid unpredictable behavior or bad practices.**

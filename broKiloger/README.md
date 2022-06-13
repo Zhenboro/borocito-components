@@ -31,7 +31,7 @@ Is like a restart. Clean the record and then keep logging keys.
 /sendandexit
 ```
 The logs contain the keys pressed. {KEY_CODE} or normal uppercase letters for alphabet keys.  
-Can't undestand a shit? [Key mapping for broKiloger keylog](https://chemic-jug.000webhostapp.com/Borocito/Mapeo_Teclas_Kiloger.txt)  
+Can't understand a shit? [Key mapping for broKiloger keylog](https://chemic-jug.000webhostapp.com/Borocito/Mapeo_Teclas_Kiloger.txt)  
 
 You can also send keys with:  
  ```sh
@@ -43,3 +43,6 @@ Example:
 ```
 That will open the start menu and then type explorer.exe, then start that process with the enter key.  
 This function is executed asynchronously. So the keylog will still work.  
+
+### WARNING
+**The plugins created are not perfect. I recommend you take a look at the code to know what it does and how it does it, so you avoid unpredictable behavior or bad practices.**

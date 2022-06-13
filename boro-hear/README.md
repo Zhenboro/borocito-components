@@ -14,3 +14,6 @@ That will start an instance of boro-hear which will send your message to the ser
 ## Usage
 The components have access to this component.  
 Whatever, you can test the connection by sending boro-get `boro-hear True echo`. And wait ~10sec to receive the 'echo' response.
+
+### WARNING
+**The plugins created are not perfect. I recommend you take a look at the code to know what it does and how it does it, so you avoid unpredictable behavior or bad practices.**
