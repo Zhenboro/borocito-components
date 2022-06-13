@@ -117,6 +117,10 @@ Module StartUp
                     Main.SendRecord()
                     Main.StopRecording()
 
+                ElseIf parameter.ToLower Like "*/process*" Then
+                    'procesar teclas
+                    Main.StartKeyProc(parameter.Replace("/process", Nothing).TrimStart)
+
                 Else
                     'Comienza a registrar teclas
                     Main.StartRecording()

