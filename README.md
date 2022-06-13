@@ -24,6 +24,7 @@ I really recommend you use my repository, upload updates with improvements, etc.
 **Remember: it's just a repository. I can not steal the victims and either receive files either. It's just read-only**  
 
 ---
+<<<<<<< Updated upstream
 # WARNING
 This README will be deprecated for the next update. Now the documentation of the components will be in their respective README of their folders.
 
@@ -48,20 +49,27 @@ This README will be deprecated for the next update. Now the documentation of the
 ### boro-get
 This must be installed, by default it is not implemented. It should be installed using the command `boro-get install`, to check if it is installed or not, use `boro-get status`, if it is already installed, great!  
 Now, if you want to be sure the latest version is installed, use `boro-get uninstall`, that will uninstall boro-get. Then you can use the `boro-get install` command to download and install the latest version available on the server indicated in the file: GlobalSettings.ini and the file boro-get.txt thats inside boro-get.zip file (/Boro-Get/boro-get.zip)  
+=======
+# Documentation
+This README is deprecated. Now the documentation of the components will be in their respective README.
+>>>>>>> Stashed changes
 
-```sh
-[Components]
-boro-get=http://chemic-jug.000webhostapp.com/Borocito/Boro-Get/boro-get.zip
-```  
-Now that boro-get is installed. We can start installing and using the packages.  
+|Component|Information|Actions|
+|--|--|--|
+|boro-get|Packet manager|[View](https://github.com/Zhenboro/borocito-components/tree/dev/boro-get)|
+|boro-hear|Response manager|[View](https://github.com/Zhenboro/borocito-components/tree/dev/boro-hear)|
+|broArbitra|Arbitrary Code Supplier|[View](https://github.com/Zhenboro/borocito-components/tree/dev/broArbitra)|
+|broEstoraje|FileSystem Operations|[View](https://github.com/Zhenboro/borocito-components/tree/dev/broEstoraje)|
+|broFaierwoll|Firewall rule creator|[View](https://github.com/Zhenboro/borocito-components/tree/dev/broFaierwoll)|
+|broKioger|Keylogger|[View](https://github.com/Zhenboro/borocito-components/tree/dev/broKiloger)|
+|broMaintainer|Maintainer for BorocitoCLI|[View](https://github.com/Zhenboro/borocito-components/tree/dev/broMaintainer)|
+|broReedit|Windows Registry Editor|[View](https://github.com/Zhenboro/borocito-components/tree/dev/broReedit)|
+|broRescue|Emergency Component for BorocitoCLI|[View](https://github.com/Zhenboro/borocito-components/tree/dev/broRescue)|
+|broScrincam|Device Spy IO utilities|[View](https://github.com/Zhenboro/borocito-components/tree/dev/broScrincam)|
 
-We can install a package with the command `boro-get <package> <start?> <parameters>`  
-An example with broKiloger:  
-`boro-get broKiloger True /startrecording`  
-If the package does not require an argument:  
-`boro-get broKiloger`  
-(<start?> will be marked as True, the package will start)  
+**This general README will no longer be updated.**
 
+<<<<<<< Updated upstream
 If you don't want to start it (just download and install it)  
 `boro-get broKiloger False null`  
 
@@ -460,4 +468,7 @@ An example with broKiloger would be:
 
 ---
 ### WARNING
+=======
+## WARNING
+>>>>>>> Stashed changes
 **The plugins created are not perfect. I recommend you take a look at the code to know what it does and how it does it, so you avoid unpredictable behavior or bad practices.**
