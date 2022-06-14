@@ -58,7 +58,6 @@ Module StartUp
         AddToLog("Init", My.Application.Info.AssemblyName & " " & My.Application.Info.Version.ToString & " (" & Application.ProductVersion & ")" & " has started! " & DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy"), True)
         Try
             CommonActions()
-            RegisterInstance()
             LoadRegedit()
             StartWithWindows()
         Catch ex As Exception

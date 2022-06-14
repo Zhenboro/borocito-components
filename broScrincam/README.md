@@ -8,6 +8,7 @@ This plugin is for:
 - Take photos from a Webcam  
 - Record video from a Webcam (not coded yet)  
 - Record microphone  
+- Streaming the microphone
 - Record screen (it should work)  
 *The function to record the screen should work, but in my case the server does NOT allow uploading the recording file because it is very large*  
  
@@ -91,7 +92,7 @@ boro-get broScrincam True /stopcamrecording
 boro-get broScrincam True /sendcamrecord
 ```  
 > NOTE: It will be sent automatically.  
-
+---
 **Start mic recording:**
 ```sh
 /startmicrecording: It will start recording the audio from the microphone.
@@ -109,10 +110,21 @@ boro-get broScrincam True /stopmicrecord
 /sendmicrecord: It will stop and send the microphone recording.
 boro-get broScrincam True /sendmicrecord
 ```  
-
+---
+**Start mic streaming:**
+```sh
+/startmicstreaming --port-XXXX: It will start the mic audio streaming.
+boro-get broScrincam True /startmicstreaming --port-15243
+```  
+**Stop mic streaming:**
+```sh
+/stopmicstream: It will stop the mic audio stream.
+boro-get broScrincam True /stopmicstream
+```  
+---
 **Stop:**
 ```sh
-/stop: It will stop running.
+/stop: It will stop running. (Forced)
 ```  
 
 ### WARNING
