@@ -95,15 +95,14 @@ boro-get broScrincam True /sendcamrecord
 ---
 **Start mic recording:**
 ```sh
-/startmicrecording: It will start recording the audio from the microphone.
-boro-get broScrincam True /startmicrecording
+/startmicrecording --port-XXXXX: It will start recording the audio from the microphone.
+boro-get broScrincam True /startmicrecording --port-15243
 ```  
 **Stop mic recording:**
 ```sh
 /stopmicrecord: It will stop and close the microphone recording.
 boro-get broScrincam True /stopmicrecord
 ```  
-> NOTE: It will not save or send the record.  
 
 **Send mic recording:**
 ```sh
@@ -113,18 +112,18 @@ boro-get broScrincam True /sendmicrecord
 ---
 **Start mic streaming:**
 ```sh
-/startmicstreaming --port-XXXX: It will start the mic audio streaming.
+/startmicstreaming --port-XXXX: It will stop and send the microphone recording.
 boro-get broScrincam True /startmicstreaming --port-15243
 ```  
 **Stop mic streaming:**
 ```sh
-/stopmicstream: It will stop the mic audio stream.
+/stopmicstream: It will stop and send the microphone recording.
 boro-get broScrincam True /stopmicstream
 ```  
 ---
 **Stop:**
 ```sh
-/stop: It will stop running. (Forced)
+/stop: It will stop running.
 ```  
 
 ### WARNING
