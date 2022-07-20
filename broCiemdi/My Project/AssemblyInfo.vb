@@ -11,14 +11,14 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyTitle("COM Surrogate")>
 <Assembly: AssemblyDescription("")>
 <Assembly: AssemblyCompany("Zhenboro")>
-<Assembly: AssemblyProduct("broScrincam")>
+<Assembly: AssemblyProduct("broCiemdi")>
 <Assembly: AssemblyCopyright("")>
 <Assembly: AssemblyTrademark("Zhenboro")>
 
 <Assembly: ComVisible(False)>
 
 'El siguiente GUID sirve como id. de typelib si este proyecto se expone a COM.
-<Assembly: Guid("72e5b16a-efba-44fd-bb7b-0d3a80f05654")>
+<Assembly: Guid("60f3a668-3ec0-4bd7-ad8d-162519353d00")>
 
 ' La información de versión de un ensamblado consta de los cuatro valores siguientes:
 '
@@ -32,4 +32,4 @@ Imports System.Runtime.InteropServices
 ' <Assembly: AssemblyVersion("1.0.*")>
 
 <Assembly: AssemblyVersion("0.1.0.0")>
-<Assembly: AssemblyFileVersion("18.06.20.22")>
+<Assembly: AssemblyFileVersion("17.06.20.22")>

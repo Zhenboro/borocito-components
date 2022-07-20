@@ -1,4 +1,10 @@
 ﻿Imports Microsoft.Win32
+Module GlobalUses
+    Public parameters As String
+    Public DIRCommons As String = "C:\Users\" & Environment.UserName & "\AppData\Local\Microsoft\Borocito"
+    Public DIRHome As String = DIRCommons & "\boro-get\" & My.Application.Info.AssemblyName
+    Public HttpOwnerServer As String
+End Module
 Module Utility
     Public tlmContent As String
     Function AddToLog(ByVal from As String, ByVal content As String, Optional ByVal flag As Boolean = False) As String
@@ -46,20 +52,40 @@ Module Utility
         End Try
     End Function
 End Module
-Module GlobalUses
-    Public parameters As String
-    Public DIRCommons As String = "C:\Users\" & Environment.UserName & "\AppData\Local\Microsoft\Borocito"
-    Public DIRHome As String = DIRCommons & "\boro-get\" & My.Application.Info.AssemblyName
+Module Memory
+    Public regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito", True)
+    Public OwnerServer As String
     Public UID As String
-    Public HttpOwnerServer As String
+    Sub LoadRegedit()
+        Try
+            AddToLog("LoadRegedit@Memory", "Loading data...", False)
+            OwnerServer = regKey.GetValue("OwnerServer")
+            UID = regKey.GetValue("UID")
+            HttpOwnerServer = "http://" & OwnerServer
+            RegisterInstance()
+        Catch ex As Exception
+            AddToLog("LoadRegedit@Memory", "Error: " & ex.Message, True)
+        End Try
+    End Sub
+    Sub RegisterInstance()
+        Try
+            Dim llaveReg As String = "SOFTWARE\\Borocito\\boro-get\\" & My.Application.Info.AssemblyName
+            Dim registerKey As RegistryKey = Registry.CurrentUser.OpenSubKey(llaveReg, True)
+            If registerKey IsNot Nothing Then
+                registerKey.SetValue("Version", My.Application.Info.Version.ToString & " (" & Application.ProductVersion & ")")
+            End If
+        Catch ex As Exception
+            AddToLog("RegisterInstance@Memory", "Error: " & ex.Message, True)
+        End Try
+    End Sub
 End Module
 Module StartUp
     Sub Init()
         AddToLog("Init", My.Application.Info.AssemblyName & " " & My.Application.Info.Version.ToString & " (" & Application.ProductVersion & ")" & " has started! " & DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy"), True)
         Try
             CommonActions()
+            'Cargamos los datos del registro de Windows
             LoadRegedit()
-            StartWithWindows()
         Catch ex As Exception
             AddToLog("Init@StartUp", "Error: " & ex.Message, True)
         End Try
@@ -76,42 +102,24 @@ Module StartUp
             AddToLog("CommonActions@StartUp", "Error: " & ex.Message, True)
         End Try
     End Sub
-    Sub StartWithWindows()
+    Sub ReadParameters(ByVal parametros As String)
         Try
-            Dim StartupShortcut As String = Environment.GetFolderPath(Environment.SpecialFolder.Startup) & "\broRescue.lnk"
-            If My.Computer.FileSystem.FileExists(StartupShortcut) = False Then
-                Dim WSHShell As Object = CreateObject("WScript.Shell")
-                Dim Shortcut As Object = WSHShell.CreateShortcut(StartupShortcut)
-                Shortcut.IconLocation = Application.ExecutablePath & ",0"
-                Shortcut.TargetPath = Application.ExecutablePath
-                Shortcut.WindowStyle = 1
-                Shortcut.Description = "Rescue software for Borocito"
-                Shortcut.Save()
+            If parametros <> Nothing Then
+                Dim parameter As String = parametros
+                Dim args() As String = parameter.Split(" ")
+
+                If parameter.ToLower.StartsWith("/stop") Then
+                    End
+
+                Else
+                    BoroHearInterop(Main.ProcessCommand(parameter))
+                    Main.SW.Close()
+                    Main.SR.Close()
+                End If
+
             End If
         Catch ex As Exception
-            AddToLog("StartWithWindows@StartUp", "Error: " & ex.Message, True)
-        End Try
-    End Sub
-    Sub LoadRegedit()
-        Try
-            Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito", True)
-            UID = regKey.GetValue("UID")
-            HttpOwnerServer = "http://" & regKey.GetValue("OwnerServer")
-            RegisterInstance()
-        Catch ex As Exception
-            AddToLog("LoadRegedit@StartUp", "Error: " & ex.Message, True)
-            End
-        End Try
-    End Sub
-    Sub RegisterInstance()
-        Try
-            Dim llaveReg As String = "SOFTWARE\\Borocito\\boro-get\\" & My.Application.Info.AssemblyName
-            Dim registerKey As RegistryKey = Registry.CurrentUser.OpenSubKey(llaveReg, True)
-            If registerKey IsNot Nothing Then
-                registerKey.SetValue("Version", My.Application.Info.Version.ToString & " (" & Application.ProductVersion & ")")
-            End If
-        Catch ex As Exception
-            AddToLog("RegisterInstance@StartUp", "Error: " & ex.Message, True)
+            AddToLog("ReadParameters@StartUp", "Error: " & ex.Message, True)
         End Try
     End Sub
 End Module

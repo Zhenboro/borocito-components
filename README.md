@@ -25,7 +25,7 @@ I really recommend you use my repository, upload updates with improvements, etc.
 
 ---
 # Documentation
-This README is deprecated. Now the documentation of the components will be in their respective README.
+This README will be deprecated for the next update. Now the documentation of the components will be in their respective README of their folders.
 
 |Component|Information|Actions|
 |--|--|--|
@@ -40,7 +40,8 @@ This README is deprecated. Now the documentation of the components will be in th
 |broRescue|Emergency Component for BorocitoCLI|[View](https://github.com/Zhenboro/borocito-components/tree/dev/broRescue)|
 |broScrincam|Device Spy IO utilities|[View](https://github.com/Zhenboro/borocito-components/tree/dev/broScrincam)|
 
-**This general README will no longer be updated.**
+**The documentation of each plugin will be in its respective README inside its folder. This general README will no longer be updated.**
 
+---
 ## WARNING
 **The plugins created are not perfect. I recommend you take a look at the code to know what it does and how it does it, so you avoid unpredictable behavior or bad practices.**

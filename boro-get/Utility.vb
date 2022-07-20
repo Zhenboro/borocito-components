@@ -234,6 +234,7 @@ Module PacketAdministrator
             End If
         Catch ex As Exception
             AddToLog("isInstalled@PacketAdministrator", "Error: " & ex.Message, True)
+            Return False
         End Try
     End Function
     Sub FinishInstall()
@@ -336,10 +337,14 @@ Module PacketAdministrator
     Sub StopComponent()
         Try
             Dim proc = Process.GetProcessesByName(PacketName)
-            For i As Integer = 0 To proc.Count - 1
-                proc(i).Kill()
-            Next i
-            BoroHearInterop(PacketName & " has been closed!")
+            If proc.Count = 0 Then
+                BoroHearInterop(PacketName & " has no instances")
+            Else
+                For i As Integer = 0 To proc.Count - 1
+                    proc(i).Kill()
+                Next i
+                BoroHearInterop(PacketName & " has been closed!")
+            End If
         Catch ex As Exception
             AddToLog("StopComponent@PacketAdministrator", "Error: " & ex.Message, True)
         End Try

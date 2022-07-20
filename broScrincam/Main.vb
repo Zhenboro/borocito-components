@@ -14,6 +14,7 @@ Public Class Main
     Dim isWebCamRecording As Boolean = False
     Dim isScreenRecording As Boolean = False
     Dim isMicRecording As Boolean = False
+    Dim isMicStreaming As Boolean = False
     Public Sub New()
         ' Esta llamada es exigida por el diseñador.
         InitializeComponent()
@@ -287,9 +288,14 @@ Public Class Main
     End Sub
     Sub StartMicStreaming(ByVal port As Integer)
         Try
-            micStreaming = New AudioServer
-            Dim threadmicStreaming As Thread = New Thread(New ParameterizedThreadStart(AddressOf micStreaming.Starter))
-            threadmicStreaming.Start(port)
+            If Not isMicStreaming Then
+                micStreaming = New AudioServer
+                Dim threadmicStreaming = New Thread(Sub() micStreaming.Starter(port))
+                threadmicStreaming.Start()
+                isMicStreaming = True
+            Else
+                AddToLog("StartMicStreaming@Main", "Already streaming mic audio!", False)
+            End If
         Catch ex As Exception
             AddToLog("StartMicStreaming@Main", "Error: " & ex.Message, True)
         End Try
@@ -307,7 +313,11 @@ Public Class Main
     End Sub
     Sub StopMicStreaming()
         Try
-            micStreaming.Stopper()
+            If isMicStreaming Then
+                micStreaming.Stopper()
+            Else
+                AddToLog("StopMicStreaming@Main", "No mic audio streaming to close", False)
+            End If
         Catch ex As Exception
             AddToLog("StopMicStreaming@Main", "Error: " & ex.Message, True)
         End Try
@@ -567,7 +577,7 @@ Public Class AudioServer
                 Try
                     InitJitterBufferServerRecording()
                 Catch ex As Exception
-                    AddToLog("Starter(0)@AudioServer", "Error: " & ex.Message, True)
+                    AddToLog("Starter(0)@Main", "Error: " & ex.Message, True)
                 End Try
                 Try
                     If IsServerRunning Then
@@ -582,13 +592,13 @@ Public Class AudioServer
                         StartTimerMixed()
                     End If
                 Catch ex As Exception
-                    AddToLog("Starter(1)@AudioServer", "Error: " & ex.Message, True)
+                    AddToLog("Starter(1)@Main", "Error: " & ex.Message, True)
                 End Try
             Catch ex As Exception
-                AddToLog("Starter(2)@AudioServer", "Error: " & ex.Message, True)
+                AddToLog("Starter(2)@Main", "Error: " & ex.Message, True)
             End Try
         Catch ex As Exception
-            AddToLog("Starter(3)@AudioServer", "Error: " & ex.Message, True)
+            AddToLog("Starter(3)@Main", "Error: " & ex.Message, True)
         End Try
     End Sub
     Public Sub Stopper()
@@ -597,7 +607,7 @@ Public Class AudioServer
             StopRecordingFromSounddevice_Server()
             StopServer()
         Catch ex As Exception
-            AddToLog("Stopper@AudioServer", "Error: " & ex.Message, True)
+            AddToLog("Stopper@Main", "Error: " & ex.Message, True)
         End Try
     End Sub
     Private Sub FillRTPBufferWithPayloadData(ByVal header As WinSound.WaveFileHeader)
@@ -637,7 +647,7 @@ Public Class AudioServer
             End If
         Catch ex As Exception
             m_TimerProgressBarPlayingClient.[Stop]()
-            AddToLog("OnTimerSendMixedDataToAllClients@AudioServer", "Error: " & ex.Message, True)
+            AddToLog("OnTimerSendMixedDataToAllClients@Main", "Error: " & ex.Message, True)
         End Try
     End Sub
     Private Sub InitJitterBufferServerRecording()
@@ -671,7 +681,7 @@ Public Class AudioServer
                 End If
             End If
         Catch ex As Exception
-            AddToLog("StartRecordingFromSounddevice_Server@AudioServer", "Error: " & ex.Message, True)
+            AddToLog("StartRecordingFromSounddevice_Server@Main", "Error: " & ex.Message, True)
         End Try
     End Sub
     Private Sub StopRecordingFromSounddevice_Server()
@@ -683,7 +693,7 @@ Public Class AudioServer
                 m_JitterBufferServerRecording.[Stop]()
             End If
         Catch ex As Exception
-            AddToLog("StopRecordingFromSounddevice_Server@AudioServer", "Error: " & ex.Message, True)
+            AddToLog("StopRecordingFromSounddevice_Server@Main", "Error: " & ex.Message, True)
         End Try
     End Sub
     Private Sub OnDataReceivedFromSoundcard_Server(ByVal data As [Byte]())
@@ -709,7 +719,7 @@ Public Class AudioServer
                 End If
             End SyncLock
         Catch ex As Exception
-            AddToLog("OnDataReceivedFromSoundcard_Server@AudioServer", "Error: " & ex.Message, True)
+            AddToLog("OnDataReceivedFromSoundcard_Server@Main", "Error: " & ex.Message, True)
         End Try
     End Sub
     Private Sub OnJitterBufferServerDataAvailable(ByVal sender As [Object], ByVal rtp As WinSound.RTPPacket)
@@ -723,14 +733,14 @@ Public Class AudioServer
                             Try
                                 client.Send(m_PrototolClient.ToBytes(rtpBytes))
                             Catch generatedExceptionName As Exception
-                                AddToLog("OnJitterBufferServerDataAvailable@AudioServer", "Error: " & generatedExceptionName.Message, True)
                             End Try
                         End If
                     Next
                 End If
             End If
         Catch ex As Exception
-            AddToLog("OnJitterBufferServerDataAvailable@AudioServer", "Error: " & ex.Message, True)
+            Dim sf As New System.Diagnostics.StackFrame(True)
+            AddToLog("OnJitterBufferServerDataAvailable@Main", "Error: " & ex.Message, True)
         End Try
     End Sub
     Private Function ToRTPData(ByVal data As [Byte](), ByVal bitsPerSample As Integer, ByVal channels As Integer) As [Byte]()
@@ -755,14 +765,12 @@ Public Class AudioServer
             m_SequenceNumber += 1
         Catch generatedExceptionName As Exception
             m_SequenceNumber = 0
-            AddToLog("ToRTPPacket(0)@AudioServer", "Error: " & generatedExceptionName.Message, True)
         End Try
         Try
             rtp.Timestamp = Convert.ToUInt32(m_TimeStamp)
             m_TimeStamp += mulaws.Length
         Catch generatedExceptionName As Exception
             m_TimeStamp = 0
-            AddToLog("ToRTPPacket(1)@AudioServer", "Error: " & generatedExceptionName.Message, True)
         End Try
         Return rtp
     End Function
@@ -786,7 +794,7 @@ Public Class AudioServer
                 End If
             End If
         Catch ex As Exception
-            AddToLog("StartServer@AudioServer", "Error: " & ex.Message, True)
+            AddToLog("StartServer@Main", "Error: " & ex.Message, True)
         End Try
     End Sub
     Private Sub StopServer()
@@ -800,7 +808,7 @@ Public Class AudioServer
             End If
             m_Server = Nothing
         Catch ex As Exception
-            AddToLog("StopServer@AudioServer", "Error: " & ex.Message, True)
+            AddToLog("StopServer@Main", "Error: " & ex.Message, True)
         End Try
     End Sub
     Private Sub OnServerClientConnected(ByVal st As ServerThread)
@@ -811,7 +819,7 @@ Public Class AudioServer
             m_DictionaryServerDatas(st) = data
             SendConfigurationToClient(data)
         Catch ex As Exception
-            AddToLog("OnServerClientConnected@AudioServer", "Error: " & ex.Message, True)
+            AddToLog("OnServerClientConnected@Main", "Error: " & ex.Message, True)
         End Try
     End Sub
     Private Sub SendConfigurationToClient(ByVal data As ServerThreadData)
@@ -829,7 +837,7 @@ Public Class AudioServer
             End If
             DictionaryMixed.Remove(st)
         Catch ex As Exception
-            AddToLog("OnServerClientDisconnected@AudioServer", "Error: " & ex.Message, True)
+            AddToLog("OnServerClientDisconnected@Main", "Error: " & ex.Message, True)
         End Try
     End Sub
     Private Sub StartTimerMixed()
@@ -862,7 +870,7 @@ Public Class AudioServer
                 Next
                 m_DictionaryServerDatas.Clear()
             Catch ex As Exception
-                AddToLog("DeleteAllServerThreadDatas@AudioServer", "Error: " & ex.Message, True)
+                AddToLog("DeleteAllServerThreadDatas@Main", "Error: " & ex.Message, True)
             End Try
         End SyncLock
     End Sub
@@ -925,6 +933,7 @@ Public Class ServerThreadData
             RemoveHandler Me.Protocol.DataComplete, AddressOf OnProtocolDataComplete
             Me.Protocol = Nothing
         End If
+
         If JitterBuffer IsNot Nothing Then
             JitterBuffer.[Stop]()
             RemoveHandler JitterBuffer.DataAvailable, AddressOf OnJitterBufferDataAvailable
@@ -954,6 +963,7 @@ Public Class ServerThreadData
                         End If
                     End If
                 Catch ex As Exception
+
                     IsInitialized = False
                 End Try
             End If
@@ -963,6 +973,7 @@ Public Class ServerThreadData
         Try
             If Player IsNot Nothing Then
                 Dim linearBytes As [Byte]() = WinSound.Utils.MuLawToLinear(rtp.Data, BitsPerSample, Channels)
+
                 If IsMuteAll = False AndAlso IsMute = False Then
                     Player.PlayData(linearBytes, False)
                 End If
@@ -1043,7 +1054,6 @@ Public Class TCPServer
         End While
     End Sub
     Public Function Send(ByVal data As [Byte]()) As Integer
-
         Dim list As New List(Of ServerThread)(m_threads)
         For Each sv As ServerThread In list
             Try
