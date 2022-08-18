@@ -25,6 +25,8 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "broFaierwoll", "broFaierwol
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "broCiemdi", "broCiemdi\broCiemdi.vbproj", "{0BB93423-2AAB-44D4-8D12-D5A25FA31FA8}"
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "boro-config", "boro-config\boro-config.vbproj", "{2261B8F4-B5C3-4D5B-B180-11632BCC66BD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +77,10 @@ Global
 		{0BB93423-2AAB-44D4-8D12-D5A25FA31FA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0BB93423-2AAB-44D4-8D12-D5A25FA31FA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0BB93423-2AAB-44D4-8D12-D5A25FA31FA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2261B8F4-B5C3-4D5B-B180-11632BCC66BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2261B8F4-B5C3-4D5B-B180-11632BCC66BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2261B8F4-B5C3-4D5B-B180-11632BCC66BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2261B8F4-B5C3-4D5B-B180-11632BCC66BD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
