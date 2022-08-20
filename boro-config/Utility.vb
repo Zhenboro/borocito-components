@@ -7,7 +7,7 @@ Module GlobalUses
 End Module
 Module Utility
     Public tlmContent As String
-    Function AddToLog(ByVal from As String, ByVal content As String, Optional ByVal flag As Boolean = False) As String
+    Function AddToLog(ByVal from As String, ByVal content As String, Optional ByVal flag As Boolean = False, Optional ByVal cmdColor As ConsoleColor = ConsoleColor.White) As String
         Try
             Dim OverWrite As Boolean = False
             If My.Computer.FileSystem.FileExists(DIRHome & "\" & My.Application.Info.AssemblyName & ".log") Then
@@ -19,7 +19,13 @@ Module Utility
             End If
             Dim Message As String = DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy") & finalContent & " [" & from & "] " & content
             tlmContent = tlmContent & Message & vbCrLf
-            Console.WriteLine("[" & from & "]" & finalContent & " " & content)
+            If cmdColor <> ConsoleColor.White Then
+                Console.ForegroundColor = cmdColor
+                Console.WriteLine("[" & from & "]" & finalContent & " " & content)
+                Console.ForegroundColor = ConsoleColor.White
+            Else
+                Console.WriteLine("[" & from & "]" & finalContent & " " & content)
+            End If
             Try
                 My.Computer.FileSystem.WriteAllText(DIRHome & "\" & My.Application.Info.AssemblyName & ".log", vbCrLf & Message, OverWrite)
             Catch
@@ -51,34 +57,50 @@ Module Utility
             Return False
         End Try
     End Function
+    Function ReadBorocitoLog() As String
+        Try
+            Dim lastLog As String = Nothing
+            While True
+                If lastLog <> IO.File.ReadAllLines(DIRCommons & "\Borocito.log")(IO.File.ReadAllLines(DIRCommons & "\Borocito.log").Length - 1) Then
+                    AddToLog("BorocitoCLI", IO.File.ReadAllLines(DIRCommons & "\Borocito.log")(IO.File.ReadAllLines(DIRCommons & "\Borocito.log").Length - 1), False, ConsoleColor.Yellow)
+                    lastLog = IO.File.ReadAllLines(DIRCommons & "\Borocito.log")(IO.File.ReadAllLines(DIRCommons & "\Borocito.log").Length - 1)
+                End If
+                Threading.Thread.Sleep(500)
+            End While
+            Return "Borocito Log Reader stopped"
+        Catch ex As Exception
+            Return AddToLog("ReadBorocitoLog@Memory", "Error: " & ex.Message, True)
+        End Try
+    End Function
 End Module
 Module Memory
     Public regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito", True)
     Public OwnerServer As String
     Public UID As String
     Public ConsoleMode As SByte = 0
-    Sub LoadRegedit()
+    Function LoadRegedit() As String
         Try
-            AddToLog("LoadRegedit@Memory", "Loading data...", False)
+
             OwnerServer = regKey.GetValue("OwnerServer")
             UID = regKey.GetValue("UID")
             HttpOwnerServer = "http://" & OwnerServer
             ConsoleMode = regKey.GetValue("ConsoleMode")
+            Return AddToLog("LoadRegedit@Memory", "Data loaded!", False)
         Catch ex As Exception
-            AddToLog("LoadRegedit@Memory", "Error: " & ex.Message, True)
+            Return AddToLog("LoadRegedit@Memory", "Error: " & ex.Message, True)
         End Try
-    End Sub
-    Sub SaveRegedit()
+    End Function
+    Function SaveRegedit() As String
         Try
-            AddToLog("SaveRegedit@Memory", "Saving data...", False)
             regKey.SetValue("ConsoleMode", ConsoleMode, RegistryValueKind.String)
             regKey.SetValue("OwnerServer", OwnerServer, RegistryValueKind.String)
             regKey.SetValue("UID", UID, RegistryValueKind.String)
             LoadRegedit()
+            Return AddToLog("SaveRegedit@Memory", "Data saved!", False)
         Catch ex As Exception
-            AddToLog("SaveRegedit@Memory", "Error: " & ex.Message, True)
+            Return AddToLog("SaveRegedit@Memory", "Error: " & ex.Message, True)
         End Try
-    End Sub
+    End Function
     Sub RegisterInstance()
         Try
             Dim llaveReg As String = "SOFTWARE\\Borocito\\boro-get\\" & My.Application.Info.AssemblyName
@@ -93,13 +115,14 @@ Module Memory
 End Module
 Module StartUp
     Sub Init()
-        AddToLog("Init", My.Application.Info.AssemblyName & " " & My.Application.Info.Version.ToString & " (" & My.Application.Info.Version.ToString & ")" & " has started! " & DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy"), True)
+        AddToLog("Init", My.Application.Info.AssemblyName & " " & My.Application.Info.Version.ToString & " (" & My.Application.Info.Version.ToString & ")" & " has started! " & DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy"), True, ConsoleColor.Green)
         Try
             CommonActions()
             'Cargamos los datos del registro de Windows
             LoadRegedit()
             SaveRegedit()
             RegisterInstance()
+            InicializeBorocitoLogReader()
         Catch ex As Exception
             AddToLog("Init@StartUp", "Error: " & ex.Message, True)
         End Try
@@ -116,7 +139,7 @@ Module StartUp
             AddToLog("CommonActions@StartUp", "Error: " & ex.Message, True)
         End Try
     End Sub
-    Sub ReadParameters(ByVal parametros() As String)
+    Function ReadParameters(ByVal parametros() As String) As String
         Try
             If parametros.Length > 0 Then
                 For Each parameter As String In parametros
@@ -130,8 +153,17 @@ Module StartUp
 
                 Next
             End If
+            Return Nothing
         Catch ex As Exception
-            AddToLog("ReadParameters@StartUp", "Error: " & ex.Message, True)
+            Return AddToLog("ReadParameters@StartUp", "Error: " & ex.Message, True)
+        End Try
+    End Function
+    Sub InicializeBorocitoLogReader()
+        Try
+            Dim threadBorocitoLogReader As Threading.Thread = New Threading.Thread(AddressOf ReadBorocitoLog)
+            threadBorocitoLogReader.Start()
+        Catch ex As Exception
+            AddToLog("InicializeBorocitoLogReader@StartUp", "Error: " & ex.Message, True)
         End Try
     End Sub
 End Module
