@@ -122,7 +122,7 @@ Module StartUp
             LoadRegedit()
             SaveRegedit()
             RegisterInstance()
-            InicializeBorocitoLogReader()
+            'InicializeBorocitoLogReader() 'Satura la consola
         Catch ex As Exception
             AddToLog("Init@StartUp", "Error: " & ex.Message, True)
         End Try
