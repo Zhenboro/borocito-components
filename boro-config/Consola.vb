@@ -10,4 +10,17 @@ Public Class Consola
             PreProcessor(TextBox1.Text)
         End If
     End Sub
+
+    Private Sub Consola_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
+        ConsoleMode = 1
+        HandleConsoleMode()
+    End Sub
+
+    Public Sub AppendToConsole(ByVal message As String, Optional ByVal color As ConsoleColor = ConsoleColor.Black)
+        Try
+            RichTextBox1.AppendText(vbCrLf & message)
+        Catch ex As Exception
+            AddToLog("[" & Handle.ToString & "]", "Error: " & ex.Message, True)
+        End Try
+    End Sub
 End Class

@@ -32,18 +32,8 @@ Module Command
                 canExit = True
                 End
             End If
-            If ActualMode = "Main" Then
-                If command.ToLower = "boro-config" Then
-                    ActualMode = command.ToLower
-                    Return "Switch console to '" & ActualMode & "'"
-                ElseIf command.ToLower = "boro-get" Then
-                    Console.WriteLine("! -- CAUTION: Real-time operations -- !")
-                    ActualMode = command.ToLower
-                    Return "Switch console to '" & ActualMode & "'"
-                ElseIf command.ToLower = "component" Then
-                    ActualMode = command.ToLower
-                End If
-            ElseIf ActualMode = "boro-config" Then
+
+            If ActualMode = "boro-config" Then
                 If command.ToLower.StartsWith("set") Then
                     If args(1).ToLower.StartsWith("ownerserver") Then
                         OwnerServer = args(2)

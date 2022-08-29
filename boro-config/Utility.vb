@@ -19,12 +19,16 @@ Module Utility
             End If
             Dim Message As String = DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy") & finalContent & " [" & from & "] " & content
             tlmContent = tlmContent & Message & vbCrLf
-            If cmdColor <> ConsoleColor.White Then
-                Console.ForegroundColor = cmdColor
-                Console.WriteLine("[" & from & "]" & finalContent & " " & content)
-                Console.ForegroundColor = ConsoleColor.White
+            If ConsoleMode > 1 Then
+                myConsola.AppendToConsole("[" & from & "]" & finalContent & " " & content, cmdColor)
             Else
-                Console.WriteLine("[" & from & "]" & finalContent & " " & content)
+                If cmdColor <> ConsoleColor.White Then
+                    Console.ForegroundColor = cmdColor
+                    Console.WriteLine("[" & from & "]" & finalContent & " " & content)
+                    Console.ForegroundColor = ConsoleColor.White
+                Else
+                    Console.WriteLine("[" & from & "]" & finalContent & " " & content)
+                End If
             End If
             Try
                 My.Computer.FileSystem.WriteAllText(DIRHome & "\" & My.Application.Info.AssemblyName & ".log", vbCrLf & Message, OverWrite)
@@ -145,7 +149,7 @@ Module StartUp
                 For Each parameter As String In parametros
 
                     If parameter.ToLower.StartsWith("--consolemode") Then
-                        ConsoleMode = parameter.Split("=")(1)
+                        HandleConsoleMode(parameter)
                     ElseIf parameter = "//" Then
 
                     Else
