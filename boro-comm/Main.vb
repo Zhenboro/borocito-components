@@ -6,6 +6,7 @@
         parameters = Command()
         StartUp.Init()
         ReadParameters(parameters)
+        Console.WriteLine("INITIALING")
         AddHandler Microsoft.Win32.SystemEvents.SessionEnding, AddressOf SessionEvent
     End Sub
     Sub SessionEvent(ByVal sender As Object, ByVal e As Microsoft.Win32.SessionEndingEventArgs)

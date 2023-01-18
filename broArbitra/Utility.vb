@@ -110,7 +110,7 @@ Module StartUp
                 Dim args() As String = parameter.Split(" ")
 
                 If parameter.ToLower.StartsWith("-init") Then
-                    If args.Count = 3 Then 'no arg
+                    If args.Count = 2 Then 'no arg
                         BoroHearInterop(Main.Initializer(args(1)))
                     Else
                         BoroHearInterop(Main.Initializer(args(1), args(2)))

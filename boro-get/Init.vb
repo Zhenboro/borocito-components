@@ -23,10 +23,10 @@
                     isUninstall = True
                 ElseIf args(1).ToLower = "status" Then
                     BypassInit = True
-                    PacketInfo(args(0))
+                    Boro_Get.PacketManager.PacketInfo(args(0))
                 ElseIf args(1).ToLower = "stop" Then
                     BypassInit = True
-                    StopComponent()
+                    Boro_Get.PacketManager.StopComponent()
                 Else
                     MustRunAtEnd = Boolean.Parse(args(1))
                     If args(2).ToLower <> "null" Then

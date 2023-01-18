@@ -74,6 +74,7 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="component.vb" />
     <Compile Include="Init.vb">
       <SubType>Form</SubType>
     </Compile>

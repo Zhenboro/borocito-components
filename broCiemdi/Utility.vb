@@ -108,13 +108,16 @@ Module StartUp
                 Dim parameter As String = parametros
                 Dim args() As String = parameter.Split(" ")
 
-                If parameter.ToLower.StartsWith("/stop") Then
+                If parameter.ToLower.StartsWith("/start") Then
+                    Main.StartTheInstance()
+
+                ElseIf parameter.ToLower.StartsWith("/stop") Then
+                    Main.StopTheInstance()
                     End
 
                 Else
-                    BoroHearInterop(Main.ProcessCommand(parameter))
-                    Main.SW.Close()
-                    Main.SR.Close()
+                    Main.ProcessCommand(parameter)
+
                 End If
 
             End If

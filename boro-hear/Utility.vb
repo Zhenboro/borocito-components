@@ -55,6 +55,7 @@ Module StartUp
         Try
             CommonActions()
             LoadRegedit()
+            'Boro_Comm.Connector.ConnectorManager()
         Catch ex As Exception
             AddToLog("Init@StartUp", "Error: " & ex.Message, True)
         End Try
@@ -119,6 +120,10 @@ Module ResponseAdministrator
 
     Sub SendToServer(ByVal message As String)
         Try
+            Try
+                Boro_Comm.Connector.ENVIAR(message)
+            Catch
+            End Try
             Threading.Thread.Sleep(5000) '5 sec para evitar solapados
             If sendStatus Then
                 AddToLog("SendToServer@server_CONNECT", "Processing: " & message, False)

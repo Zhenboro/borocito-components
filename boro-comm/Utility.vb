@@ -6,7 +6,7 @@ Module GlobalUses
 End Module
 Module Utility
     Public tlmContent As String
-    Sub AddToLog(ByVal from As String, ByVal content As String, Optional ByVal flag As Boolean = False)
+    Function AddToLog(ByVal from As String, ByVal content As String, Optional ByVal flag As Boolean = False) As String
         Try
             Dim OverWrite As Boolean = False
             If My.Computer.FileSystem.FileExists(DIRHome & "\" & My.Application.Info.AssemblyName & ".log") Then
@@ -17,16 +17,18 @@ Module Utility
                 finalContent = " [!!!]"
             End If
             Dim Message As String = DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy") & finalContent & " [" & from & "] " & content
-            tlmContent = tlmContent & Message & vbCrLf
-            Console.WriteLine("[" & from & "]" & finalContent & " " & content)
+            Dim myMessage As String = "[" & from & "]" & finalContent & " " & content
+            Console.WriteLine(myMessage)
             Try
                 My.Computer.FileSystem.WriteAllText(DIRHome & "\" & My.Application.Info.AssemblyName & ".log", vbCrLf & Message, OverWrite)
             Catch
             End Try
+            Return finalContent & "[" & from & "]" & content
         Catch ex As Exception
             Console.WriteLine("[AddToLog@Utility]Error: " & ex.Message)
+            Return "[AddToLog@Utility]Error: " & ex.Message
         End Try
-    End Sub
+    End Function
 End Module
 Module StartUp
     Sub Init()
