@@ -16,7 +16,6 @@ Namespace Boro_Get
         Public RepositoryFilePath As String = DIRCommons & "\Repositories.ini"
 
         Public isUninstall As Boolean = False
-        Public MustRecharge As Boolean = False
         Public PacketName As String = Nothing
         Public PacketRunParameters As String = Nothing
         Public MustRunAtEnd As Boolean = True
@@ -91,72 +90,25 @@ Namespace Boro_Get
             End Try
         End Sub
         Private Sub DownloadInstallPackage_DownloadFileCompleted(ByVal sender As Object, ByVal e As System.ComponentModel.AsyncCompletedEventArgs) Handles asyncDownloaderZip.DownloadFileCompleted
-            CallInstaller(DIRPacketFile)
+            FinishInstall()
         End Sub
-
-        Sub CallInstaller(ByVal zipFilePath As String)
-            Try
-                SetInstallVars()
-                If Not isUninstall Then
-                    If Not isInstalled(zipFilePath) Then
-                        FinishInstall()
-                    End If
-                    End
-                Else
-                    Uninstall()
-                    End
-                End If
-            Catch ex As Exception
-                AddToLog("CallInstaller@PacketAdministrator", "Error: " & ex.Message, True)
-                End
-            End Try
-        End Sub
-
-        Function isInstalled(ByVal zipFilePath As String) As Boolean
-            Try
-                'MustRecharge= Si el directorio boro-get del componente ha sido eliminado
-                If MustRecharge Then
-                    AddToLog("isInstalled@PacketAdministrator", "Recharging...", False)
-                    Uninstall()
-                    ZipFile.ExtractToDirectory(zipFilePath, installFolder)
-                    Return False
-                End If
-                If My.Computer.FileSystem.FileExists(execFilePath) Then
-                    AddToLog("isInstalled@PacketAdministrator", "Already exist! Running it...", False)
-                    isAlreadyInstalled = True
-                    MustRunAtEnd = True
-                    FinishInstall()
-                    Return True
-                Else
-                    AddToLog("isInstalled@PacketAdministrator", "Installing...", False)
-                    isAlreadyInstalled = False
-                    ZipFile.ExtractToDirectory(zipFilePath, installFolder)
-                    Return False
-                End If
-            Catch ex As Exception
-                AddToLog("isInstalled@PacketAdministrator", "Error: " & ex.Message, True)
-                Return False
-            End Try
-        End Function
         Sub FinishInstall()
             Try
                 AddToLog("FinishInstall@PacketAdministrator", "Finishing...", False)
+                SetInstallVars()
                 RegisterInstall()
+                ZipFile.ExtractToDirectory(DIRPacketFile, installFolder)
                 If MustRunAtEnd Then
-                    AddToLog("FinishInstall@PacketAdministrator", "Running it...", False)
-                    Dim argsToRun As String = Nothing
-                    argsToRun = PacketRunParameters
-                    Process.Start(execFilePath, argsToRun)
+                    ComponentInstanceManager(execFilePath)
                 End If
-                If Not isAlreadyInstalled Then
-                    Dim contenido As String = Nothing
-                    contenido = vbCrLf & "[BORO-GET: PACKET.ADMIN]" &
+                Dim contenido As String = Nothing
+                contenido = vbCrLf & "[BORO-GET: PACKET.ADMIN]" &
                         vbCrLf & PacketName & " has been installed!" &
                         vbCrLf & "Run: " & MustRunAtEnd &
                         vbCrLf & "Parameters: " & PacketRunParameters &
                         vbCrLf & "[BORO-GET: PACKET.ADMIN]" & vbCrLf
-                    BoroHearInterop(contenido)
-                End If
+                BoroHearInterop(contenido)
+                End
             Catch ex As Exception
                 AddToLog("FinishInstall@PacketAdministrator", "Error: " & ex.Message, True)
                 End
@@ -186,7 +138,6 @@ Namespace Boro_Get
                 Else
                     AddToLog("RegisterInstall@PacketAdministrator", "Already registered!", False)
                 End If
-                'If regKey.GetValue(PacketName) = Nothing Or regKey.GetValue("Name") = Nothing Or regKey.GetValue("Version") = Nothing Then
                 regKey.SetValue(PacketName, execFilePath)
                 regKey.SetValue("Author", GetIniValue("GENERAL", "Author", DIRPacketRepo))
                 regKey.SetValue("From", GetIniValue("GENERAL", "From", DIRPacketRepo))
@@ -197,17 +148,16 @@ Namespace Boro_Get
                 regKey.SetValue("Binaries", GetIniValue("INSTALLER", "Binaries", DIRPacketRepo))
                 regKey.SetValue("Installer", GetIniValue("INSTALLER", "Installer", DIRPacketRepo))
                 regKey.SetValue("InstallFolder", GetIniValue("INSTALLER", "InstallFolder", DIRPacketRepo))
-                'End If
             Catch ex As Exception
                 AddToLog("RegisterInstall@PacketAdministrator", "Error: " & ex.Message, True)
             End Try
         End Sub
-    End Module
-
-    Module PacketManager
         Sub Uninstall()
             Try
                 AddToLog("Uninstall@PacketAdministrator", "Uninstalling...", False)
+                Dim packageRegKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito\\boro-get\\" & PacketName, True)
+                Dim executableFile As String = packageRegKey.GetValue(PacketName)
+                Dim installDirectory As String = DIRCommons & "\" & PacketName
                 Try
                     Dim proc = Process.GetProcessesByName(PacketName)
                     For i As Integer = 0 To proc.Count - 1
@@ -216,11 +166,11 @@ Namespace Boro_Get
                 Catch ex As Exception
                     AddToLog("Uninstall(CheckRunning)@PacketAdministrator", "Error: " & ex.Message, True)
                 End Try
-                If My.Computer.FileSystem.FileExists(execFilePath) Then
-                    My.Computer.FileSystem.DeleteFile(execFilePath)
+                If My.Computer.FileSystem.FileExists(executableFile) Then
+                    My.Computer.FileSystem.DeleteFile(executableFile)
                 End If
-                If My.Computer.FileSystem.DirectoryExists(installFolder) Then
-                    My.Computer.FileSystem.DeleteDirectory(installFolder, FileIO.DeleteDirectoryOption.DeleteAllContents)
+                If My.Computer.FileSystem.DirectoryExists(installDirectory) Then
+                    My.Computer.FileSystem.DeleteDirectory(installDirectory, FileIO.DeleteDirectoryOption.DeleteAllContents)
                 End If
                 Dim llaveReg As String = "SOFTWARE\\Borocito\\boro-get"
                 Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey(llaveReg, True)
@@ -236,7 +186,17 @@ Namespace Boro_Get
                 AddToLog("Uninstall@PacketAdministrator", "Error: " & ex.Message, True)
             End Try
         End Sub
+        Sub ComponentInstanceManager(ByVal componentPath As String)
+            Try
+                AddToLog("ComponentInstanceManager@PacketAdministrator", "Running it...", False)
+                Process.Start(componentPath, PacketRunParameters)
+            Catch ex As Exception
+                AddToLog("ComponentInstanceManager@PacketAdministrator", "Error: " & ex.Message, True)
+            End Try
+        End Sub
+    End Module
 
+    Module PacketManager
         Sub StopComponent()
             Try
                 Dim proc = Process.GetProcessesByName(PacketName)
@@ -249,7 +209,7 @@ Namespace Boro_Get
                     BoroHearInterop(PacketName & " has been closed!")
                 End If
             Catch ex As Exception
-                AddToLog("StopComponent@PacketAdministrator", "Error: " & ex.Message, True)
+                AddToLog("StopComponent@PacketManager", "Error: " & ex.Message, True)
             End Try
         End Sub
 
@@ -266,7 +226,7 @@ Namespace Boro_Get
                         isRunning = "No"
                     End If
                 Catch ex As Exception
-                    AddToLog("PacketInfo(CheckRunning)@PacketAdministrator", "Error: " & ex.Message, True)
+                    AddToLog("PacketInfo(CheckRunning)@PacketManager", "Error: " & ex.Message, True)
                 End Try
                 Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey(llaveReg, True)
                 If regKey Is Nothing Then
@@ -283,10 +243,8 @@ Namespace Boro_Get
                 End If
                 BoroHearInterop(contenido)
             Catch ex As Exception
-                AddToLog("PacketInfo@PacketAdministrator", "Error: " & ex.Message, True)
+                AddToLog("PacketInfo@PacketManager", "Error: " & ex.Message, True)
             End Try
         End Sub
     End Module
 End Namespace
-'TODO:
-'   BORO-GET DESCARGA, Y DESCARGA, Y VUELVE A INSTALAR UN COMPONENTE AUNQUE ESTE YA ESTE INSTALADO (no hay verificacion)

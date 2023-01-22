@@ -8,7 +8,7 @@ Imports System.Runtime.InteropServices
 
 ' Revisar los valores de los atributos del ensamblado
 
-<Assembly: AssemblyTitle("Packet administrator tool for Borocito CLI Software")>
+<Assembly: AssemblyTitle("Package administrator tool for Borocito CLI Software")>
 <Assembly: AssemblyDescription("Administrador de paquetes")>
 <Assembly: AssemblyCompany("Zhenboro")>
 <Assembly: AssemblyProduct("boro-get")>

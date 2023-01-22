@@ -66,17 +66,44 @@ Module StartUp
             Boro_Get.DIRPacketFile = Boro_Get.DIRPacket & "\" & Boro_Get.PacketName & ".zip"
             CommonActions()
             'verificar si existe o no la instalacion del componente
-            Boro_Get.GlobalVariables.GetRepositoryFile()
-            Boro_Get.PacketAdministrator.SearchInRepoList(Boro_Get.PacketName)
+            If IsAlreadyInstalled() Then 'Si esta instalado
+                Boro_Get.isAlreadyInstalled = True
+                Boro_Get.ComponentInstanceManager(Boro_Get.DIRPacket & "\" & Boro_Get.PacketName & ".exe")
+                End
+            Else 'Si no esta instalado
+                Boro_Get.isAlreadyInstalled = False
+                Boro_Get.GlobalVariables.GetRepositoryFile()
+                Boro_Get.PacketAdministrator.SearchInRepoList(Boro_Get.PacketName)
+            End If
         Catch ex As Exception
             AddToLog("Init@StartUp", "Error: " & ex.Message, True)
         End Try
     End Sub
+    Function IsAlreadyInstalled() As Boolean
+        Try
+            Dim registerKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito\\boro-get\\" & Boro_Get.PacketName, True)
+            If registerKey IsNot Nothing Then 'La llave existe
+                If registerKey.GetValue(Boro_Get.PacketName) <> Nothing And registerKey.GetValue("Version") <> Nothing Then 'Si existen los valores
+                    If My.Computer.FileSystem.FileExists(registerKey.GetValue(Boro_Get.PacketName)) Then 'Si existe el binario
+                        Return True 'Correctamente instalado
+                    Else 'No existe el binario
+                        Return False
+                    End If
+                Else 'No existen los valores
+                    Return False
+                End If
+            Else 'La llave no existe
+                Return False
+            End If
+        Catch ex As Exception
+            AddToLog("IsAlreadyInstaller@StartUp", "Error: " & ex.Message, True)
+            Return False
+        End Try
+    End Function
     Sub CommonActions()
         Try
             If Not My.Computer.FileSystem.DirectoryExists(DIRCommons) Then
                 My.Computer.FileSystem.CreateDirectory(DIRCommons)
-                Boro_Get.MustRecharge = True
             End If
             If Not My.Computer.FileSystem.DirectoryExists(Boro_Get.DIRPacket) Then
                 My.Computer.FileSystem.CreateDirectory(Boro_Get.DIRPacket)
