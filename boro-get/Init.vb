@@ -18,9 +18,9 @@
             If parameters.Contains(" ") Then
                 '<packetName> <Run?/actionCommand> <parameters...>
                 Dim args As String() = parametros.Split(" ")
-                PacketName = args(0)
+                Boro_Get.PacketName = args(0)
                 If args(1).ToLower = "uninstall" Then 'Comandos de accion para componentes
-                    isUninstall = True
+                    Boro_Get.isUninstall = True
                 ElseIf args(1).ToLower = "status" Then
                     BypassInit = True
                     Boro_Get.PacketManager.PacketInfo(args(0))
@@ -28,20 +28,20 @@
                     BypassInit = True
                     Boro_Get.PacketManager.StopComponent()
                 Else
-                    MustRunAtEnd = Boolean.Parse(args(1))
+                    Boro_Get.MustRunAtEnd = Boolean.Parse(args(1))
                     If args(2).ToLower <> "null" Then
-                        PacketRunParameters = " "
+                        Boro_Get.PacketRunParameters = " "
                         For i = 2 To args.Count - 1
-                            PacketRunParameters &= args(i) & " "
+                            Boro_Get.PacketRunParameters &= args(i) & " "
                         Next
-                        PacketRunParameters = PacketRunParameters.TrimStart()
-                        PacketRunParameters = PacketRunParameters.TrimEnd()
+                        Boro_Get.PacketRunParameters = Boro_Get.PacketRunParameters.TrimStart()
+                        Boro_Get.PacketRunParameters = Boro_Get.PacketRunParameters.TrimEnd()
                     End If
                 End If
             Else
-                PacketName = parameters
+                Boro_Get.PacketName = parameters
             End If
-            AddToLog("BORO-GET", "Instance for " & PacketName, True)
+            AddToLog("BORO-GET", "Instance for " & Boro_Get.PacketName, True)
         Catch ex As Exception
             AddToLog("ReadParameters@Init", "Error: " & ex.Message, True)
             End

@@ -62,10 +62,11 @@ Module StartUp
         Try
             RegisterInstance()
             Boro_Get.DIRPacket = DIRCommons & "\" & Boro_Get.PacketName
-            Boro_Get.DIRPacketRepo = Boro_Get.DIRPacket & "\" & Boro_Get.PacketName & ".txt"
+            Boro_Get.DIRPacketRepo = Boro_Get.DIRPacket & "\" & Boro_Get.PacketName & ".inf"
             Boro_Get.DIRPacketFile = Boro_Get.DIRPacket & "\" & Boro_Get.PacketName & ".zip"
             CommonActions()
-            Boro_Get.GlobalVariables.GetRepoLink()
+            'verificar si existe o no la instalacion del componente
+            Boro_Get.GlobalVariables.GetRepositoryFile()
             Boro_Get.PacketAdministrator.SearchInRepoList(Boro_Get.PacketName)
         Catch ex As Exception
             AddToLog("Init@StartUp", "Error: " & ex.Message, True)
@@ -80,8 +81,8 @@ Module StartUp
             If Not My.Computer.FileSystem.DirectoryExists(Boro_Get.DIRPacket) Then
                 My.Computer.FileSystem.CreateDirectory(Boro_Get.DIRPacket)
             End If
-            If My.Computer.FileSystem.FileExists(Boro_Get.DIRRepoFile) Then
-                My.Computer.FileSystem.DeleteFile(Boro_Get.DIRRepoFile)
+            If My.Computer.FileSystem.FileExists(Boro_Get.RepositoryFilePath) Then
+                My.Computer.FileSystem.DeleteFile(Boro_Get.RepositoryFilePath)
             End If
             If My.Computer.FileSystem.FileExists(Boro_Get.DIRPacketRepo) Then
                 My.Computer.FileSystem.DeleteFile(Boro_Get.DIRPacketRepo)

@@ -8,12 +8,12 @@ Namespace Boro_Get
         Public asyncDownloaderZipURI As Uri
         Public isAlreadyInstalled As Boolean
 
-        Public DIRRepoFile As String = DIRCommons & "\RepoList.txt"
         Public DIRPacket As String = DIRCommons & "\" & PacketName
-        Public DIRPacketRepo As String = DIRPacket & "\" & PacketName & ".txt"
+        Public DIRPacketRepo As String = DIRPacket & "\" & PacketName & ".inf"
         Public DIRPacketFile As String = DIRPacket & "\" & PacketName & ".zip"
 
-        Public RepoFileUrl As String
+        Public RepositoryFileURL As String
+        Public RepositoryFilePath As String = DIRCommons & "\Repositories.ini"
 
         Public isUninstall As Boolean = False
         Public MustRecharge As Boolean = False
@@ -21,16 +21,16 @@ Namespace Boro_Get
         Public PacketRunParameters As String = Nothing
         Public MustRunAtEnd As Boolean = True
 
-        Sub GetRepoLink()
+        Sub GetRepositoryFile()
             Try
                 Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito\\boro-get", True)
                 If regKey Is Nothing Then
                     End
                 Else
-                    RepoFileUrl = regKey.GetValue("RepoListURL")
+                    RepositoryFileURL = regKey.GetValue("Repository")
                 End If
             Catch ex As Exception
-                AddToLog("GetRepoLink@StartUp", "Error: " & ex.Message, True)
+                AddToLog("GetRepositoryFile@Global", "Error: " & ex.Message, True)
                 End
             End Try
         End Sub
@@ -40,13 +40,13 @@ Namespace Boro_Get
         Public WithEvents asyncDownloaderZip As New Net.WebClient
         Sub SearchInRepoList(ByVal packetName As String)
             Try
-                If My.Computer.FileSystem.FileExists(DIRRepoFile) Then
-                    My.Computer.FileSystem.DeleteFile(DIRRepoFile)
+                If My.Computer.FileSystem.FileExists(RepositoryFilePath) Then
+                    My.Computer.FileSystem.DeleteFile(RepositoryFilePath)
                 End If
                 'Descargar repo list
-                My.Computer.Network.DownloadFile(RepoFileUrl, DIRRepoFile)
+                My.Computer.Network.DownloadFile(RepositoryFileURL, RepositoryFilePath)
                 'Verificar la existencia del paquete en el repo list
-                Dim repoInfoToDownload As String = GetIniValue("REPOS", packetName, DIRRepoFile)
+                Dim repoInfoToDownload As String = GetIniValue("REPOSITORIES", packetName, RepositoryFilePath)
                 If repoInfoToDownload <> Nothing Then
                     'de existir, llamar a DownloadFromRepoList
                     DownloadFromRepoInfo(repoInfoToDownload)
@@ -82,7 +82,7 @@ Namespace Boro_Get
                 If My.Computer.FileSystem.FileExists(DIRPacketFile) Then
                     My.Computer.FileSystem.DeleteFile(DIRPacketFile)
                 End If
-                'Descargar repo zip
+                'Descargar packet zip
                 asyncDownloaderZipURI = New Uri(zipFileURL)
                 asyncDownloaderZip.DownloadFileAsync(asyncDownloaderZipURI, DIRPacketFile)
             Catch ex As Exception
@@ -107,13 +107,14 @@ Namespace Boro_Get
                     End
                 End If
             Catch ex As Exception
-                AddToLog("CallEXInstaller@PacketAdministrator", "Error: " & ex.Message, True)
+                AddToLog("CallInstaller@PacketAdministrator", "Error: " & ex.Message, True)
                 End
             End Try
         End Sub
 
         Function isInstalled(ByVal zipFilePath As String) As Boolean
             Try
+                'MustRecharge= Si el directorio boro-get del componente ha sido eliminado
                 If MustRecharge Then
                     AddToLog("isInstalled@PacketAdministrator", "Recharging...", False)
                     Uninstall()
@@ -163,7 +164,7 @@ Namespace Boro_Get
         End Sub
         Sub SetInstallVars()
             Try
-                AddToLog("SetInstallVars@PacketAdministrator", "Setting install variables...", False)
+                AddToLog("SetInstallVars@PacketAdministrator", "Seting install variables...", False)
                 installFolder = DIRCommons & "\" & PacketName
                 If My.Computer.FileSystem.DirectoryExists(installFolder) Then
                     My.Computer.FileSystem.CreateDirectory(installFolder)
@@ -175,7 +176,7 @@ Namespace Boro_Get
         End Sub
         Sub RegisterInstall()
             Try
-                AddToLog("RegisterInstall@PacketAdministrator", "Checking registrer...", False)
+                AddToLog("RegisterInstall@PacketAdministrator", "Checking registry...", False)
                 Dim llaveReg As String = "SOFTWARE\\Borocito\\boro-get\\" & PacketName
                 Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey(llaveReg, True)
                 If regKey Is Nothing Then
@@ -287,3 +288,5 @@ Namespace Boro_Get
         End Sub
     End Module
 End Namespace
+'TODO:
+'   BORO-GET DESCARGA, Y DESCARGA, Y VUELVE A INSTALAR UN COMPONENTE AUNQUE ESTE YA ESTE INSTALADO (no hay verificacion)

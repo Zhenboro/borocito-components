@@ -77,9 +77,8 @@ Module Command
                     Return AnotherCommand(args)
                 End If
             Else
-
             End If
-
+            Return "*uwu*"
         Catch ex As Exception
             Return AddToLog("ReadCommandLine@boro-config", "Error: " & ex.Message, True)
         End Try
