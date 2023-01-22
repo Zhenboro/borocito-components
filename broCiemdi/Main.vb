@@ -1,6 +1,4 @@
-﻿Imports System.Text
-
-Public Class Main
+﻿Public Class Main
     Dim strResults As String
     Dim ResultadoComando As String
     Dim canSend As Boolean = False

