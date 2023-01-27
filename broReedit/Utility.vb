@@ -84,125 +84,60 @@ Module StartUp
             AddToLog("RegisterInstance@StartUp", "Error: " & ex.Message, True)
         End Try
     End Sub
-End Module
-Module RegistryEditor
-    Dim currentHiveKey As String
-    Dim currentHiveKeyReg As RegistryKey
-    Dim currentKey As String
+    Sub ReadParameters(ByVal parametros As String)
+        Try
+            If parametros <> Nothing Then
+                Dim parameter As String = parametros
+                Dim args() As String = parameter.Split(" ")
 
-    Function SelectHKey(ByVal hiveKey As String) As String 'Funciona 24/04 14:37
-        Try
-            currentHiveKey = hiveKey
-            Select Case hiveKey
-                Case "ClassesRoot"
-                    currentHiveKeyReg = Registry.ClassesRoot
-                Case "CurrentConfig"
-                    currentHiveKeyReg = Registry.CurrentConfig
-                Case "CurrentUser"
-                    currentHiveKeyReg = Registry.CurrentUser
-                Case "LocalMachine"
-                    currentHiveKeyReg = Registry.LocalMachine
-                Case "PerformanceData"
-                    currentHiveKeyReg = Registry.PerformanceData
-                Case "Users"
-                    currentHiveKeyReg = Registry.Users
-                Case Else
-                    currentHiveKeyReg = Registry.CurrentUser
-            End Select
-            Return "HiveKey selected " & currentHiveKey
-        Catch ex As Exception
-            Return AddToLog("SelectHKey@RegistryEditor", "Error: " & ex.Message, True)
-        End Try
-    End Function
-    Function SelectKey(ByVal nameKey As String) As String 'Funciona 24/04 14:38
-        Try
-            currentKey = nameKey
-            currentHiveKeyReg = Registry.CurrentUser.OpenSubKey(nameKey, True)
-            Return "Key selected " & currentKey
-        Catch ex As Exception
-            Return AddToLog("SelectKey@RegistryEditor", "Error: " & ex.Message, True)
-        End Try
-    End Function
+                If args(0).ToLower = "/selecthk" Then
+                    BoroHearInterop(vbCrLf & Main.SelectHKey(args(1)))
 
-    Function GetValue(ByVal valueName As String) As String 'Funciona 24/04 14:39
-        Try
-            Return currentHiveKeyReg.GetValue(valueName)
-        Catch ex As Exception
-            Return AddToLog("GetValue@RegistryEditor", "Error: " & ex.Message, True)
-        End Try
-    End Function
-    Function SetValue(ByVal valueName As String, ByVal value As String, Optional ByVal valueKind As String = Nothing) As String  'Funciona 24/04 14:44
-        Try
-            If valueKind = Nothing Or valueKind.ToLower = "null" Then
-                valueKind = 1
+                ElseIf args(0).ToLower = "/selectkey" Then
+                    BoroHearInterop(vbCrLf & Main.SelectKey(args(1)))
+
+                ElseIf args(0).ToLower = "/getvalue" Then
+                    BoroHearInterop(vbCrLf & Main.GetValue(args(1)))
+
+                ElseIf args(0).ToLower = "/setvalue" Then
+                    'Si el valor (args(2)) contiene espacios, generara un error (se mesclara en args(3) = SByte).
+                    BoroHearInterop(vbCrLf & Main.SetValue(args(1), args(2), args(3)))
+
+
+                ElseIf args(0).ToLower = "/createsubkey" Then
+                    BoroHearInterop(vbCrLf & Main.CreateSubKey(args(1)))
+
+                ElseIf args(0).ToLower = "/deletevalue" Then
+                    BoroHearInterop(vbCrLf & Main.DeleteValue(args(1)))
+
+                ElseIf args(0).ToLower = "/deletesubkeytree" Then
+                    BoroHearInterop(vbCrLf & Main.DeleteSubKeyTree(args(1)))
+
+                ElseIf args(0).ToLower = "/deletesubkey" Then
+                    BoroHearInterop(vbCrLf & Main.DeleteSubKey(args(1)))
+
+
+                ElseIf args(0).ToLower = "/getvaluenames()" Then
+                    BoroHearInterop(vbCrLf & Main.GetValueNames())
+
+                ElseIf args(0).ToLower = "/getsubkeynames()" Then
+                    BoroHearInterop(vbCrLf & Main.GetSubKeyNames())
+
+                ElseIf args(0).ToLower = "/getvaluekind" Then
+                    BoroHearInterop(vbCrLf & Main.GetValueKind(args(1)))
+
+                ElseIf args(0).ToLower = "/exit" Or args(0).ToLower = "/stop" Or args(0).ToLower = "/close" Then
+                    End
+
+                End If
+
             End If
-            currentHiveKeyReg.SetValue(valueName, value, valueKind)
-            Return "Seted! Name " & valueName & " Value " & value
         Catch ex As Exception
-            Return AddToLog("SetValue@RegistryEditor", "Error: " & ex.Message, True)
+            AddToLog("ReadParameters@Init", "Error: " & ex.Message, True)
         End Try
-    End Function
-    Function DeleteValue(ByVal valueName As String) As String 'Funciona 24/04 14:56
-        Try
-            currentHiveKeyReg.DeleteValue(valueName)
-            Return "Deleted! " & valueName
-        Catch ex As Exception
-            Return AddToLog("DeleteValue@RegistryEditor", "Error: " & ex.Message, True)
-        End Try
-    End Function
+    End Sub
 
-    Function CreateSubKey(ByVal subKey As String) As String 'Funciona 24/04 15:04
-        Try
-            currentHiveKeyReg.CreateSubKey(subKey, True)
-            Return "Key created! " & subKey
-        Catch ex As Exception
-            Return AddToLog("CreateSubKey@RegistryEditor", "Error: " & ex.Message, True)
-        End Try
-    End Function
-    Function DeleteSubKey(ByVal subKey As String) As String 'Funciona 24/04 15:11
-        Try
-            currentHiveKeyReg.DeleteSubKey(subKey)
-            Return "Key deleted! " & subKey
-        Catch ex As Exception
-            Return AddToLog("DeleteSubKey@RegistryEditor", "Error: " & ex.Message, True)
-        End Try
-    End Function
-    Function DeleteSubKeyTree(ByVal subKey As String) As String 'Funciona 24/04 15:12
-        Try
-            currentHiveKeyReg.DeleteSubKeyTree(subKey)
-            Return "Key tree deleted! " & subKey
-        Catch ex As Exception
-            Return AddToLog("DeleteSubKeyTree@RegistryEditor", "Error: " & ex.Message, True)
-        End Try
-    End Function
-
-    Function GetValueNames() As String  'Funciona 24/04 15:44
-        Try
-            Dim contenido As String = Nothing
-            For Each item As String In currentHiveKeyReg.GetValueNames()
-                contenido &= item & vbCrLf
-            Next
-            Return contenido
-        Catch ex As Exception
-            Return AddToLog("GetValueNames@RegistryEditor", "Error: " & ex.Message, True)
-        End Try
-    End Function
-    Function GetSubKeyNames() As String 'Funciona 24/04 15:45
-        Try
-            Dim contenido As String = Nothing
-            For Each item As String In currentHiveKeyReg.GetSubKeyNames()
-                contenido &= item & vbCrLf
-            Next
-            Return contenido
-        Catch ex As Exception
-            Return AddToLog("GetSubKeyNames@RegistryEditor", "Error: " & ex.Message, True)
-        End Try
-    End Function
-    Function GetValueKind(ByVal valueName As String) As String 'Funciona 24/04 15:46
-        Try
-            Return currentHiveKeyReg.GetValueKind(valueName)
-        Catch ex As Exception
-            Return AddToLog("GetValueKind@RegistryEditor", "Error: " & ex.Message, True)
-        End Try
-    End Function
+    Private Sub BoroHearInterop(p As Object)
+        Throw New NotImplementedException()
+    End Sub
 End Module

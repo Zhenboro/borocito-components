@@ -212,38 +212,83 @@ Namespace Boro_Get
                 AddToLog("StopComponent@PacketManager", "Error: " & ex.Message, True)
             End Try
         End Sub
+        Function IsComponentRunning(ByVal name As String) As Boolean
+            Try
+                Dim p() As Process = Process.GetProcessesByName(name)
+                If p.Count > 0 Then
+                    Return True
+                Else
+                    Return False
+                End If
+            Catch ex As Exception
+                AddToLog("IsComponentRunning@PacketManager", "Error: " & ex.Message, True)
+                Return False
+            End Try
+        End Function
+        Function ComponentInfo(ByVal name As String) As String()
+            Try
+                Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito\\boro-get\\" & name, True)
+                Dim contenido As String() = Nothing
+                If regKey Is Nothing Then
+                    Return {"No data to read"}
+                Else
+                    contenido = {
+                        regKey.GetValue("Author"),
+                        regKey.GetValue("Name"),
+                        regKey.GetValue("Version"),
+                        regKey.GetValue(name),
+                        regKey.GetValue("Executable"),
+                        regKey.GetValue("From"),
+                        regKey.GetValue("Web")
+                    }
+                End If
+                Return contenido
+            Catch ex As Exception
+                AddToLog("ComponentInfo@PacketManager", "Error: " & ex.Message, True)
+                Return Nothing
+            End Try
+        End Function
 
         Sub PacketInfo(ByVal packetName As String)
             Try
                 Dim contenido As String = Nothing
-                Dim llaveReg As String = "SOFTWARE\\Borocito\\boro-get\\" & packetName
-                Dim isRunning As String = "?"
-                Try
-                    Dim p() As Process = Process.GetProcessesByName(packetName)
-                    If p.Count > 0 Then
-                        isRunning = "Yes"
-                    Else
-                        isRunning = "No"
-                    End If
-                Catch ex As Exception
-                    AddToLog("PacketInfo(CheckRunning)@PacketManager", "Error: " & ex.Message, True)
-                End Try
-                Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey(llaveReg, True)
-                If regKey Is Nothing Then
-                    contenido = "[BORO-GET STATUS] No data to read"
-                Else
+                Dim PacketInfo As String() = ComponentInfo(packetName)
+                If PacketInfo.Length > 1 Then
                     contenido = vbCrLf & "[BORO-GET: STATUS.START]" &
-                        vbCrLf & "Author: " & regKey.GetValue("Author") &
-                        vbCrLf & "Name: " & regKey.GetValue("Name") &
-                        vbCrLf & "Version: " & regKey.GetValue("Version") &
-                        vbCrLf & packetName & ": " & regKey.GetValue(packetName) &
-                        vbCrLf & "Binaries: " & regKey.GetValue("Binaries") &
-                        vbCrLf & "isRunning: " & isRunning &
+                        vbCrLf & "Author: " & PacketInfo(0) &
+                        vbCrLf & "Name: " & PacketInfo(1) &
+                        vbCrLf & "Version: " & PacketInfo(2) &
+                        vbCrLf & packetName & ": " & PacketInfo(3) &
+                        vbCrLf & "Binaries: " & PacketInfo(4) &
+                        vbCrLf & "Web: " & PacketInfo(6) &
+                        vbCrLf & "isRunning: " & IsComponentRunning(packetName) &
                         vbCrLf & "[BORO-GET: STATUS.END]" & vbCrLf
+                Else
+                    contenido = vbCrLf & "[BORO-GET: STATUS.START]" & "No data to read about '" & packetName & "'" & vbCrLf & "[BORO-GET: STATUS.END]" & vbCrLf
                 End If
                 BoroHearInterop(contenido)
             Catch ex As Exception
                 AddToLog("PacketInfo@PacketManager", "Error: " & ex.Message, True)
+            End Try
+        End Sub
+        Sub IndexEveryInstalledComponent()
+            Try
+                Dim contenido As String = Nothing
+                Dim Componentes As String = Nothing
+                Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito\\boro-get", True)
+
+                For Each key As String In regKey.GetSubKeyNames
+                    Dim PacketInfo As String() = ComponentInfo(key)
+                    Componentes &= key & " " & IsComponentRunning(key) & ", " & PacketInfo(2) & vbCrLf
+                Next
+
+                contenido = vbCrLf & "[BORO-GET: INSTALLED.START]" &
+                vbCrLf & Componentes &
+                "[BORO-GET: INSTALLED.END]" & vbCrLf
+
+                BoroHearInterop(contenido)
+            Catch ex As Exception
+                AddToLog("IndexEveryInstalledComponent@PacketManager", "Error: " & ex.Message, True)
             End Try
         End Sub
     End Module

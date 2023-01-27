@@ -12,7 +12,7 @@ Namespace My
             For Each item As String In e.CommandLine
                 contenido &= item & " "
             Next
-            Init.ReadParameters(contenido)
+            broReedit.Main.ReadParameters(contenido)
             'Init.ReadParameters(e.CommandLine.Item(0).ToString)
         End Sub
     End Class
