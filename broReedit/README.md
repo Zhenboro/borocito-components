@@ -10,7 +10,7 @@ To use this component (and not navigate blindly) it is necessary to have [boro-h
 
 ## Usage
 **To select a "Hive":**  
-```sh
+```bash
 /selecthk <hive>
 ```
 Hives:  
@@ -22,54 +22,54 @@ Hives:
 -  Users
 
 Example:  
-```sh
+```bash
 /selecthk CurrentUser
 ```
 ---
 **To select a SubKey:**  
-```sh
+```bash
 /selectkey <subkey>
 ```
 Example:  
-```sh
+```bash
 /selecthk SOFTWARE\Borocito
 ```
 ---
 **To get a value:**  
-```sh
+```bash
 /getvalue <valueName>
 ```
 Example:  
-```sh
+```bash
 /getvalue OwnerServer
 ```
 ---
 **To set a value:**  
-```sh
+```bash
 /setvalue <valueName> <value> <valueKind>
 ```
 See types in [RegistryValueKind Enum (Microsoft.Win32) | Microsoft Docs](https://docs.microsoft.com/en-us/dotnet/api/microsoft.win32.registryvaluekind?msclkid=cb066977c71011ecb24bd53c4a938a9b&view=net-6.0)
 Example:  
-```sh
+```bash
 /setvalue OwnerServer http://.../ 1
 ```
 If you set null in valueKind then will be 1 (String)  
 
 ---
 **To delete a value:**  
-```sh
+```bash
 /deletevalue <valueName>
 ```
 Example:  
-```sh
+```bash
 /deletevalue OwnerServer
 ```
 ---
 **To get a value names:**  
-```sh
+```bash
 /getvaluenames()
 ```
-```sh
+```bash
 Return:
 	OwnerServer
 	UID
@@ -77,47 +77,52 @@ Return:
 ```
 ---
 **To get a value kind:**  
-```sh
+```bash
 /getvaluekind <valueName>
 ```
 Example:  
-```sh
+```bash
 /getvaluekind OwnerServer
 ```
-```sh
+```bash
 Return:
 	1
 ```
 See types in [RegistryValueKind Enum (Microsoft.Win32) | Microsoft Docs](https://docs.microsoft.com/en-us/dotnet/api/microsoft.win32.registryvaluekind?msclkid=cb066977c71011ecb24bd53c4a938a9b&view=net-6.0)
 
 ---
+**To get list of SubKeys:**  
+```bash
+/getsubkeynames()
+```
+---
 **To create a SubKey:**  
-```sh
+```bash
 /createsubkey <subKeyName>
 ```
 Example:  
-```sh
+```bash
 /createsubkey Backup
 ```
 ---
 **To delete a SubKey:**  
-```sh
+```bash
 /deletesubkey <subkeyName>
 ```
 Example:  
-```sh
+```bash
 /deletesubkey boro-get
 ```
 ---
 **To delete a SubKey Tree:**  
-```sh
+```bash
 /deletesubkeytree <subkeyName>
 ```
 Example:  
-```sh
+```bash
 /deletesubkeytree boro-get
 ```
-(Will remove all subkeys hanging from the "boro-get" key)  
+(Will remove all subkeys hanging from the "`boro-get`" key)  
 
 ### WARNING
 **The plugins created are not perfect. I recommend you take a look at the code to know what it does and how it does it, so you avoid unpredictable behavior or bad practices.**
