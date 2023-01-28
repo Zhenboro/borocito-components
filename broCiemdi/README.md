@@ -25,7 +25,7 @@ boro-get broCiemdi True <commands...>
 ```
 Example:  
 ```bash
-ipconfig
+boro-get broCiemdi True ipconfig
 ```
 ```bash
 RETURN
