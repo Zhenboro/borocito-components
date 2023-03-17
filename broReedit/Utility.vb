@@ -89,32 +89,38 @@ Module StartUp
             If parametros <> Nothing Then
                 Dim parameter As String = parametros
                 Dim args() As String = parameter.Split(" ")
+                Dim strI As Integer = -1
+                Dim strContent As String = Nothing
+                If parametros.Contains("'") Then
+                    strI = parametros.IndexOf("'")
+                    strContent = parametros.Substring(strI + 1, parametros.IndexOf("'", strI + 1) - strI - 1)
+                End If
 
                 If args(0).ToLower = "/selecthk" Then
-                    BoroHearInterop(vbCrLf & Main.SelectHKey(args(1)))
+                    BoroHearInterop(vbCrLf & Main.SelectHKey(strContent))
 
                 ElseIf args(0).ToLower = "/selectkey" Then
-                    BoroHearInterop(vbCrLf & Main.SelectKey(args(1)))
+                    BoroHearInterop(vbCrLf & Main.SelectKey(strContent))
 
                 ElseIf args(0).ToLower = "/getvalue" Then
-                    BoroHearInterop(vbCrLf & Main.GetValue(args(1)))
+                    BoroHearInterop(vbCrLf & Main.GetValue(strContent))
 
                 ElseIf args(0).ToLower = "/setvalue" Then
-                    'Si el valor (args(2)) contiene espacios, generara un error (se mesclara en args(3) = SByte).
-                    BoroHearInterop(vbCrLf & Main.SetValue(args(1), args(2), args(3)))
+                    'el valueKind DEBE estar antes que el valor
+                    BoroHearInterop(vbCrLf & Main.SetValue(args(1), strContent, args(3)))
 
 
                 ElseIf args(0).ToLower = "/createsubkey" Then
-                    BoroHearInterop(vbCrLf & Main.CreateSubKey(args(1)))
+                    BoroHearInterop(vbCrLf & Main.CreateSubKey(strContent))
 
                 ElseIf args(0).ToLower = "/deletevalue" Then
-                    BoroHearInterop(vbCrLf & Main.DeleteValue(args(1)))
+                    BoroHearInterop(vbCrLf & Main.DeleteValue(strContent))
 
                 ElseIf args(0).ToLower = "/deletesubkeytree" Then
-                    BoroHearInterop(vbCrLf & Main.DeleteSubKeyTree(args(1)))
+                    BoroHearInterop(vbCrLf & Main.DeleteSubKeyTree(strContent))
 
                 ElseIf args(0).ToLower = "/deletesubkey" Then
-                    BoroHearInterop(vbCrLf & Main.DeleteSubKey(args(1)))
+                    BoroHearInterop(vbCrLf & Main.DeleteSubKey(strContent))
 
 
                 ElseIf args(0).ToLower = "/getvaluenames()" Then
@@ -124,7 +130,7 @@ Module StartUp
                     BoroHearInterop(vbCrLf & Main.GetSubKeyNames())
 
                 ElseIf args(0).ToLower = "/getvaluekind" Then
-                    BoroHearInterop(vbCrLf & Main.GetValueKind(args(1)))
+                    BoroHearInterop(vbCrLf & Main.GetValueKind(strContent))
 
                 ElseIf args(0).ToLower = "/exit" Or args(0).ToLower = "/stop" Or args(0).ToLower = "/close" Then
                     End
@@ -135,9 +141,5 @@ Module StartUp
         Catch ex As Exception
             AddToLog("ReadParameters@Init", "Error: " & ex.Message, True)
         End Try
-    End Sub
-
-    Private Sub BoroHearInterop(p As Object)
-        Throw New NotImplementedException()
     End Sub
 End Module
