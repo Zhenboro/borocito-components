@@ -61,7 +61,7 @@ Module Memory
             AddToLog("LoadRegedit@Memory", "Loading data...", False)
             OwnerServer = regKey.GetValue("OwnerServer")
             UID = regKey.GetValue("UID")
-            HttpOwnerServer = "http://" & OwnerServer
+            HttpOwnerServer = OwnerServer
             RegisterInstance()
         Catch ex As Exception
             AddToLog("LoadRegedit@Memory", "Error: " & ex.Message, True)

