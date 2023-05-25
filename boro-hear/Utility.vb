@@ -164,17 +164,27 @@ Module ResponseAdministrator
             content = content.Replace("&", "{ampersand}")
             content = content.Replace("?", "{questionmark}")
             Dim postData As String = "content=" & content
+            Dim byteArray As Byte() = Encoding.UTF8.GetBytes(postData)
             request.ContentType = "application/x-www-form-urlencoded"
+            request.ContentLength = byteArray.Length
             request.UserAgent = My.Application.Info.AssemblyName & " / " & compileVersion
             request.Method = "POST"
-            request.Headers("Ident") = UID
-            request.Headers("Clase") = "COMMAND"
+            request.Headers("ident") = UID
+            request.Headers("class") = "COMMAND"
 
-            Dim dataStream As New StreamWriter(request.GetRequestStream())
-            dataStream.Write(postData)
+            Dim dataStream = request.GetRequestStream()
+            dataStream.Write(byteArray, 0, byteArray.Length)
             dataStream.Close()
             Dim response As WebResponse = request.GetResponse()
-            AddToLog("Network", "Response: " & CType(response, HttpWebResponse).StatusCode & " " & CType(response, HttpWebResponse).StatusDescription, False)
+            dataStream = response.GetResponseStream()
+            Dim dataReader As New StreamReader(dataStream)
+            Dim respuesta As String = dataReader.ReadToEnd()
+            AddToLog("Network", "Response: " &
+                     CType(response, HttpWebResponse).StatusCode &
+                     " " & CType(response, HttpWebResponse).StatusDescription &
+                     vbCrLf & "    " & respuesta, False)
+            dataReader.Close()
+            dataStream.Close()
             response.Close()
 
             Return True

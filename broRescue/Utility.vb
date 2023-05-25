@@ -52,6 +52,9 @@ Module GlobalUses
     Public DIRHome As String = DIRCommons & "\boro-get\" & My.Application.Info.AssemblyName
     Public UID As String
     Public HttpOwnerServer As String
+    Public compileVersion As String = My.Application.Info.Version.ToString &
+    " (" & Application.ProductVersion & ") " &
+    "[21/04/2023 17:50]" 'Indicacion exacta de la ultima compilacion
 End Module
 Module StartUp
     Sub Init()
@@ -96,7 +99,7 @@ Module StartUp
         Try
             Dim regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito", True)
             UID = regKey.GetValue("UID")
-            HttpOwnerServer = "http://" & regKey.GetValue("OwnerServer")
+            HttpOwnerServer = regKey.GetValue("OwnerServer")
             RegisterInstance()
         Catch ex As Exception
             AddToLog("LoadRegedit@StartUp", "Error: " & ex.Message, True)

